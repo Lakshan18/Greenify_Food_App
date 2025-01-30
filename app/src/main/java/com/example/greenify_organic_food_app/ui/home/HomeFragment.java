@@ -41,9 +41,9 @@ public class HomeFragment extends Fragment {
     // This method returns a list of image URLs (you can replace them with your actual images)
     private List<String> getImageList() {
         List<String> imageUrls = new ArrayList<>();
-        imageUrls.add("https://www.example.com/image1.jpg");
-        imageUrls.add("https://www.example.com/image2.jpg");
-        imageUrls.add("https://www.example.com/image3.jpg");
+        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04141642/Free-Stock-Photos-01-2048x1366.jpg");
+        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04150103/Free-Stock-Photos-03-2048x1366.jpg");
+        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04154511/Free-Stock-Photos-06-2048x1366.jpg");
         return imageUrls;
     }
 
@@ -59,18 +59,19 @@ public class HomeFragment extends Fragment {
         @NonNull
         @Override
         public ImageSliderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Inflate the layout for each image in the ViewPager
+            // Create a new ImageView for each item
             ImageView imageView = new ImageView(parent.getContext());
             imageView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
             ));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); // Optional: for a better display
             return new ImageSliderViewHolder(imageView);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ImageSliderViewHolder holder, int position) {
-            // Use Glide or any other image loading library to load images into the ImageView
+            // Load the image URL using Glide into the ImageView
             Glide.with(holder.imageView.getContext())
                     .load(imageUrls.get(position))
                     .into(holder.imageView);
@@ -81,14 +82,16 @@ public class HomeFragment extends Fragment {
             return imageUrls.size();
         }
 
+        // ViewHolder class for ImageSlider
         public class ImageSliderViewHolder extends RecyclerView.ViewHolder {
 
             ImageView imageView;
 
             public ImageSliderViewHolder(@NonNull View itemView) {
                 super(itemView);
-                imageView = itemView.findViewById(android.R.id.icon); // Fixed issue, use correct ID for ImageView
+                imageView = (ImageView) itemView;  // No need for findViewById
             }
         }
     }
 }
+
