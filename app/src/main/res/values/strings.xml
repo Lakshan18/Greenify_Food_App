@@ -1,5 +1,30 @@
 <resources>
     <string name="app_name">Greenify_Organic_Food_App</string>
+
+    <!--    Splash screen strings...-->
+    <string name="splash_text1">Welcome to</string>
+    <string name="splash_text2">Greenify </string>
+    <string name="splash_text3">Food Store</string>
+    <string name="splash_text4">"Fresh. Organic. Delivered." A vibrant animation of a basket filling with
+        fresh produce against a green backdrop, showcasing health, nature, and sustainability for your doorstep delivery experience.
+    </string>
+    <string name="splash_btn_text1">Get Started</string>
+
+    <!--    Sign in & Sign up strings...-->
+    <string name="signup_text1">Create An Account</string>
+    <string name="signup_textField_text1">Name</string>
+    <string name="signup_textField_text2">Mobile</string>
+    <string name="signup_textField_text3">Email</string>
+    <string name="signup_textField_text4">Password</string>
+    <string name="signup_textField_text5">If you have already an Account?</string>
+    <string name="signup_btn_text1">Sign Up</string>
+
+    <string name="signIn_text1">Sign In to Account</string>
+    <string name="signIn_textField_text1">Email</string>
+    <string name="signIn_textField_text2">Password</string>
+    <string name="signIn_text2">Forgot Password?</string>
+    <string name="signIn_text3">If you have already an Account?</string>
+    <string name="signIn_btn_text1">Sign In</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
