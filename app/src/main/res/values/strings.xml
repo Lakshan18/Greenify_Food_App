@@ -31,7 +31,16 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+<!--    home page strings...-->
+
+    <string name="home_textField1">Search</string>
+
+<!--    public strings drawers-->
+
     <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_my_cart">My Cart</string>
+    <string name="menu_order_history">Order History</string>
+    <string name="menu_my_profile">My Profile</string>
+
+
 </resources>
