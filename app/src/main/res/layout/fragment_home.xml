@@ -46,12 +46,15 @@
         android:layout_marginTop="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/home_searchField1">
+        app:layout_constraintTop_toBottomOf="@+id/home_searchField1"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
+            android:id="@+id/home_Linear"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <androidx.viewpager2.widget.ViewPager2
@@ -63,6 +66,138 @@
                 app:layout_constraintEnd_toEndOf="@+id/view"
                 app:layout_constraintStart_toStartOf="@+id/view"
                 app:layout_constraintTop_toTopOf="@+id/view" />
+
+            <TextView
+                android:id="@+id/home_text2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/roboto"
+                android:paddingTop="15dp"
+                android:text="@string/home_text2"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Horizontal Scrollable Categories -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"> <!-- Centering the items -->
+
+                    <LinearLayout
+                        android:id="@+id/home_Linear1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Category Item 1 -->
+                        <LinearLayout
+                            android:id="@+id/home_Linear2"
+                            android:layout_width="120dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="15dp">
+
+                            <ImageView
+                                android:id="@+id/home_slider_img1"
+                                android:layout_width="match_parent"
+                                android:layout_height="100dp"
+                                app:srcCompat="@drawable/org_food1"
+                                android:background="@drawable/rounded_image_cate"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                />
+
+                            <TextView
+                                android:id="@+id/home_Linear2_text1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/roboto"
+                                android:text="@string/category_text1"
+                                android:textAlignment="center"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- GAP (Empty View) -->
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="match_parent" />
+
+                        <!-- Category Item 2 -->
+                        <LinearLayout
+                            android:id="@+id/home_Linear3"
+                            android:layout_width="120dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="15dp">
+
+                            <ImageView
+                                android:id="@+id/home_slider_img2"
+                                android:layout_width="match_parent"
+                                android:layout_height="100dp"
+                                app:srcCompat="@drawable/tasty_vegetable_salad"
+                                android:background="@drawable/rounded_image_cate"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                />
+
+                            <TextView
+                                android:id="@+id/home_Linear2_text2"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/roboto"
+                                android:text="@string/category_text2"
+                                android:textAlignment="center"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- GAP (Empty View) -->
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="match_parent" />
+
+                        <!-- Category Item 3 -->
+                        <LinearLayout
+                            android:id="@+id/home_Linear4"
+                            android:layout_width="120dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/home_slider_img3"
+                                android:layout_width="match_parent"
+                                android:layout_height="100dp"
+                                app:srcCompat="@drawable/appetizers1"
+                                android:background="@drawable/rounded_image_cate"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                />
+
+                            <TextView
+                                android:id="@+id/home_Linear2_text3"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/roboto"
+                                android:text="@string/category_text3"
+                                android:textAlignment="center"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+
         </LinearLayout>
     </ScrollView>
 
