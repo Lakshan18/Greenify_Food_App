@@ -35,9 +35,7 @@
 
     <string name="home_textField1">Search</string>
     <string name="home_text2">Category</string>
-    <string name="category_text1">Wet Food</string>
-    <string name="category_text2">Salad</string>
-    <string name="category_text3">Appetizers</string>
+    <string name="home_text3">For You</string>
 <!--    public strings drawers-->
 
     <string name="menu_home">Home</string>
