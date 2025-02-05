@@ -5,4 +5,8 @@
     <color name="shade_gray">#F0F0F0</color>
     <color name="colorPrimary">#4CAF50</color> <!-- Green -->
     <color name="colorPrimaryVariant">#388E3C</color> <!-- Dark Green -->
+    <color name="card_bg_color">#FFFCFC</color>
+    <color name="price_color">#15A31E</color>
+    <color name="rating_color">#C3A50D</color>
+    <color name="pr_title">#764B12</color>
 </resources>

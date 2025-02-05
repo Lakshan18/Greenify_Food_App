@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -17,6 +18,8 @@ import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
 import com.example.greenify_organic_food_app.model.CategoryAdapter;
 import com.example.greenify_organic_food_app.model.CategoryModel;
+import com.example.greenify_organic_food_app.model.ProductAdapter;
+import com.example.greenify_organic_food_app.model.ProductModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,9 @@ public class HomeFragment extends Fragment {
 
     private ViewPager2 viewPager;
     private RecyclerView categoryRecyclerView;
+    private RecyclerView productRecyclerView;
+    private ProductAdapter productAdapter;
+    private List<ProductModel> productList;
     private CategoryAdapter categoryAdapter;
     private List<CategoryModel> categoryList;
     private Handler sliderHandler = new Handler();
@@ -62,6 +68,20 @@ public class HomeFragment extends Fragment {
 
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         categoryRecyclerView.setAdapter(categoryAdapter);
+
+        productRecyclerView = view.findViewById(R.id.productRecyclerView);
+        productRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 2 columns
+
+        // Initialize Product List
+        productList = new ArrayList<>();
+        productList.add(new ProductModel(R.drawable.hashbrown_waffles, "Hashbrown Waffles", 1500, "4.1"));
+        productList.add(new ProductModel(R.drawable.pumpkin_pancackes, "Pumpkin Pancakes", 1200, "3.5"));
+        productList.add(new ProductModel(R.drawable.squash_muffins, "Squash Muffins", 750, "4.0"));
+        productList.add(new ProductModel(R.drawable.white_bean_salad, "White Bean Salad", 880, "4.2"));
+
+        // Set Adapter
+        productAdapter = new ProductAdapter(productList);
+        productRecyclerView.setAdapter(productAdapter);
 
         return view;
     }

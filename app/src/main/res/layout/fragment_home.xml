@@ -110,7 +110,12 @@
                   android:textSize="20sp"
                   android:textStyle="bold"/>
 
-
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/productRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
 
         </LinearLayout>
     </ScrollView>

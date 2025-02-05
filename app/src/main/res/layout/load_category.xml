@@ -34,7 +34,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto"
-                android:text="@string/category_text1"
                 android:textAlignment="center"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
@@ -67,7 +66,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto"
-                android:text="@string/category_text2"
                 android:textAlignment="center"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
@@ -99,7 +97,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto"
-                android:text="@string/category_text3"
                 android:textAlignment="center"
                 android:textSize="16sp"
                 android:textStyle="bold"/>

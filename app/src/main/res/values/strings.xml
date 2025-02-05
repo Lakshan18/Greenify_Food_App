@@ -43,5 +43,7 @@
     <string name="menu_order_history">Order History</string>
     <string name="menu_my_profile">My Profile</string>
 
+<!--    for you section...-->
+    <string name="for_ratingText1">Rating</string>
 
 </resources>
