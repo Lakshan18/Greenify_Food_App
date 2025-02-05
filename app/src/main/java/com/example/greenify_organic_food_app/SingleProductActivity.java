@@ -3,6 +3,7 @@ package com.example.greenify_organic_food_app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,6 +38,8 @@ public class SingleProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_product);  // Use your layout for product details
 
+        Button addToCartBtn = findViewById(R.id.add_to_cart_btn1);
+        addToCartBtn.setBackgroundResource(R.drawable.btn_radius_add_to_cart);
 
         productNameTextView = findViewById(R.id.productNameTextView);
         productPriceTextView = findViewById(R.id.productPriceTextView);
