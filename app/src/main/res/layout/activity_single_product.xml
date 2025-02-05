@@ -109,7 +109,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp">
+                android:layout_height="match_parent"
+                android:layout_marginTop="15sp">
 
                 <TextView
                     android:id="@+id/productPriceTextView"
@@ -125,18 +126,37 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <ImageView
+                    android:id="@+id/imageView5"
+                    android:layout_width="12sp"
+                    android:layout_height="30sp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/textView9"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/remove" />
+
                 <TextView
                     android:id="@+id/textView9"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="108dp"
-                    android:text="@string/minus_Text1"
+                    android:layout_width="30sp"
+                    android:layout_height="30sp"
+                    android:layout_marginEnd="16dp"
+                    android:text="1"
                     android:textAlignment="center"
-                    android:textSize="34sp"
+                    android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/productPriceTextView"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView6"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/imageView6"
+                    android:layout_width="15sp"
+                    android:layout_height="30sp"
+                    android:layout_marginEnd="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.509" />
+                    app:srcCompat="@drawable/add" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -149,6 +169,57 @@
                 android:paddingHorizontal="15sp"
                 android:text="Product Description"
                 android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:fontFamily="@font/roboto"
+                android:paddingHorizontal="15sp"
+                android:text="@string/sgl_subText1"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ingredientRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="15dp"
+                android:orientation="horizontal"
+                android:overScrollMode="never"
+                android:scrollbars="none"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/sgl_subText2"
+                android:fontFamily="@font/roboto"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12sp"
+                android:paddingHorizontal="15sp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/nutritionRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"/>
+
+            <Button
+                android:id="@+id/add_to_cart_btn1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:background="@drawable/add_to_cart_btn_radius"
+                tools:text="@string/addToCart_Text1"
+                style="@style/Widget.Greenify.CustomButton"
+                />
 
         </LinearLayout>
     </ScrollView>

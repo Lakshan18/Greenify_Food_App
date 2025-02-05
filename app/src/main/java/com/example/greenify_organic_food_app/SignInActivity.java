@@ -40,22 +40,22 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                TextView textView1 = findViewById(R.id.email_textfield);
-                TextView textView2 = findViewById(R.id.password_textfield);
-
-                String email = String.valueOf(textView1.getText());
-                String password = String.valueOf(textView2.getText());
-
-                if(email.isBlank()){
-                    Toast.makeText(SignInActivity.this,"please enter your email.!",Toast.LENGTH_SHORT).show();
-                }else if(password.isBlank()){
-                    Toast.makeText(SignInActivity.this,"please enter your password.!",Toast.LENGTH_SHORT).show();
-                }else if(email.equals("Lucky12@") && password.equals("1234")){
-                    Toast.makeText(SignInActivity.this,"login success.!",Toast.LENGTH_SHORT).show();
+//                TextView textView1 = findViewById(R.id.email_textfield);
+//                TextView textView2 = findViewById(R.id.password_textfield);
+//
+//                String email = String.valueOf(textView1.getText());
+//                String password = String.valueOf(textView2.getText());
+//
+//                if(email.isBlank()){
+//                    Toast.makeText(SignInActivity.this,"please enter your email.!",Toast.LENGTH_SHORT).show();
+//                }else if(password.isBlank()){
+//                    Toast.makeText(SignInActivity.this,"please enter your password.!",Toast.LENGTH_SHORT).show();
+//                }else if(email.equals("Lucky12@") && password.equals("1234")){
+//                    Toast.makeText(SignInActivity.this,"login success.!",Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(SignInActivity.this,HomeActivity.class);
                     startActivity(intent);
-                }
+//                }
             }
         });
     }

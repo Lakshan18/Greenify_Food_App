@@ -51,6 +51,12 @@
 
 <!--    single Product View Screen-->
     <string name="sgl_headingText1">Product Overview</string>
-    <string name="plus_Text1">+</string>
-    <string name="minus_Text1">-</string>
+    <string name="example_product_descText1">Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+    </string>
+    <string name="sgl_subText1">Ingredients</string>
+    <string name="sgl_subText2">Nutrition</string>
+    <string name="addToCart_Text1">Add To Cart</string>
+    <string name="buyNow_Text1">Buy Now</string>
 </resources>

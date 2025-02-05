@@ -9,4 +9,5 @@
     <color name="price_color">#15A31E</color>
     <color name="rating_color">#C3A50D</color>
     <color name="pr_title">#764B12</color>
+    <color name="add_to_cart_btn_color">#D3661E</color>
 </resources>
