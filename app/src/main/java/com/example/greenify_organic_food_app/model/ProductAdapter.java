@@ -1,6 +1,7 @@
 package com.example.greenify_organic_food_app.model;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,15 +12,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.greenify_organic_food_app.R;
+import com.example.greenify_organic_food_app.SingleProductActivity;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private List<ProductModel> productList;
+    private Context context;
 
-    public ProductAdapter(List<ProductModel> productList) {
+    public ProductAdapter(List<ProductModel> productList, Context context) {
         this.productList = productList;
+        this.context = context;
     }
 
     @NonNull
@@ -40,6 +44,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.productTitle.setText(product.getTitle());
         holder.productPrice.setText(formattedPrice); // Set formatted price
         holder.productRatingText.setText(product.getRating() + "/5");
+
+        holder.itemView.setOnClickListener(v -> {
+            // Pass the ProductModel to SingleProductActivity
+            Intent intent = new Intent(v.getContext(), SingleProductActivity.class);
+            intent.putExtra("product", product);
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

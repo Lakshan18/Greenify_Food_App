@@ -1,5 +1,6 @@
 package com.example.greenify_organic_food_app.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -80,7 +81,7 @@ public class HomeFragment extends Fragment {
         productList.add(new ProductModel(R.drawable.white_bean_salad, "White Bean Salad", 880, "4.2"));
 
         // Set Adapter
-        productAdapter = new ProductAdapter(productList);
+        productAdapter = new ProductAdapter(productList, getContext());
         productRecyclerView.setAdapter(productAdapter);
 
         return view;
