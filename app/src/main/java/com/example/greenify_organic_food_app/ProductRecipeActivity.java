@@ -1,24 +1,43 @@
 package com.example.greenify_organic_food_app;
 
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
+import android.widget.MediaController;
+import android.widget.VideoView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.example.greenify_organic_food_app.R;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerView;
 
 public class ProductRecipeActivity extends AppCompatActivity {
+    private ExoPlayer player;
+    private PlayerView playerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_product_recipe);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        // Initialize PlayerView
+        playerView = findViewById(R.id.playerView);
+        player = new ExoPlayer.Builder(this).build();
+        playerView.setPlayer(player);
+
+        // Load video from URL
+        String videoUrl = "https://images.all-free-download.com/footage_preview/mp4/closeup_of_meal_ingredients_preparation_6892114.mp4";
+        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        player.play();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.release();
+        }
     }
 }

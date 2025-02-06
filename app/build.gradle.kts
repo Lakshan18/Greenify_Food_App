@@ -52,4 +52,5 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.stripe:stripe-android:20.43.0")
     implementation ("com.google.android.material:material:1.9.0")
+    implementation ("com.google.android.exoplayer:exoplayer:2.18.1")
 }
