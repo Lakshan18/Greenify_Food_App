@@ -5,16 +5,17 @@
     android:id="@+id/constraintLayout4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.order_history.OrderHistoryFragment" >
+    android:background="#F0F0F0"
+    tools:context=".ui.order_history.OrderHistoryFragment">
 
-    <TextView
-        android:id="@+id/orderHisText1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Order History Fragment"
-        android:textSize="20sp"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/orderRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="70dp"
+        android:padding="16dp"
+        android:background="@drawable/top_radius_ord_history"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

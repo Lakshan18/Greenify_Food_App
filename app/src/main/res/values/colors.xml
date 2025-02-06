@@ -12,4 +12,5 @@
     <color name="add_to_cart_btn_color">#D3661E</color>
     <color name="order_now_btn_color">#53A753</color>
     <color name="place_order_btn_color">#2E96D6</color>
+    <color name="update_changes_btn_color">#156EAE</color>
 </resources>
