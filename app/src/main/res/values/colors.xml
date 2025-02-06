@@ -10,4 +10,6 @@
     <color name="rating_color">#C3A50D</color>
     <color name="pr_title">#764B12</color>
     <color name="add_to_cart_btn_color">#D3661E</color>
+    <color name="order_now_btn_color">#53A753</color>
+    <color name="place_order_btn_color">#2E96D6</color>
 </resources>

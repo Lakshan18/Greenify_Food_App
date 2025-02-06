@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F0F0"
+    android:orientation="vertical"
+    tools:context=".PlaceOrderActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Title and Back Button -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Place Order"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/roboto"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/backTo_View1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/baseline_arrow_back_ios_new_24"
+                    android:contentDescription="Back"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:padding="8dp"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Checkbox for existing address -->
+            <CheckBox
+                android:id="@+id/existing_address_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/place_existing_text1"
+                android:textSize="18sp"
+                android:fontFamily="@font/roboto"
+                android:layout_marginTop="20dp"/>
+
+            <!-- Address Inputs (Visible by default) -->
+            <LinearLayout
+                android:id="@+id/address_input_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp">
+
+                <EditText
+                    android:id="@+id/edit_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/plc_or_con_name_text1"
+                    android:padding="10dp"
+                    android:background="@drawable/input_bg"/>
+
+                <EditText
+                    android:id="@+id/edit_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/plc_or_address_text1"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="@drawable/input_bg"/>
+
+                <EditText
+                    android:id="@+id/edit_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/plc_or_city_text1"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="@drawable/input_bg"/>
+
+                <EditText
+                    android:id="@+id/edit_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/plc_or_mobile_text1"
+                    android:layout_marginTop="10dp"
+                    android:inputType="phone"
+                    android:padding="10dp"
+                    android:background="@drawable/input_bg"/>
+            </LinearLayout>
+
+            <!-- Proceed Button (Always Visible) -->
+            <Button
+                android:id="@+id/btn_proceed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/plc_or_btn_text1"
+                android:textSize="18sp"
+                android:fontFamily="@font/roboto"
+                android:textStyle="bold"
+                android:backgroundTint="@color/place_order_btn_color"
+                android:textColor="@color/white"
+                android:enabled="false"
+                android:layout_marginTop="20dp"/>
+
+<!--            <Button-->
+<!--                android:id="@+id/btn_place_order"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Place Order"-->
+<!--                android:textSize="18sp"-->
+<!--                android:fontFamily="@font/roboto"-->
+<!--                android:textStyle="bold"-->
+<!--                android:backgroundTint="@color/colorPrimary"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:enabled="false"/> -->
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

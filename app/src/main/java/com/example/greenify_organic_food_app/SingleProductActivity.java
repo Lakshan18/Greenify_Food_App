@@ -38,9 +38,6 @@ public class SingleProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_product);  // Use your layout for product details
 
-        Button addToCartBtn = findViewById(R.id.add_to_cart_btn1);
-        addToCartBtn.setBackgroundResource(R.drawable.btn_radius_add_to_cart);
-
         productNameTextView = findViewById(R.id.productNameTextView);
         productPriceTextView = findViewById(R.id.productPriceTextView);
         productDescriptionTextView = findViewById(R.id.productDescriptionTextView);
@@ -95,5 +92,14 @@ public class SingleProductActivity extends AppCompatActivity {
 
         nutritionAdapter = new NutritionItemAdapter(this, nutritionList);
         nutritionRecyclerView.setAdapter(nutritionAdapter);
+
+        Button orderNowBtn = findViewById(R.id.order_now_btn);
+        orderNowBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SingleProductActivity.this,PlaceOrderActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

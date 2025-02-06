@@ -49,7 +49,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
-<!--    single Product View Screen-->
+    <!--    single Product View Screen-->
     <string name="sgl_headingText1">Product Overview</string>
     <string name="example_product_descText1">Lorem ipsum dolor sit amet, consectetur adipiscing elit,
         sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -58,5 +58,14 @@
     <string name="sgl_subText1">Ingredients</string>
     <string name="sgl_subText2">Nutrition</string>
     <string name="addToCart_Text1">Add To Cart</string>
-    <string name="buyNow_Text1">Buy Now</string>
+    <string name="order_now_Text1">Order Now</string>
+
+<!--    place order strings here....-->
+    <string name="place_order_text1">Place Order</string>
+    <string name="place_existing_text1">Place to existing address</string>
+    <string name="plc_or_con_name_text1">Contact Name</string>
+    <string name="plc_or_address_text1">Delivery Address</string>
+    <string name="plc_or_city_text1">City</string>
+    <string name="plc_or_mobile_text1">Contact Number</string>
+    <string name="plc_or_btn_text1">Proceed to Order</string>
 </resources>
