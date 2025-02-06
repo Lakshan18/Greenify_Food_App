@@ -49,7 +49,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
-<!--    my profile section...-->
+    <!--    my profile section...-->
     <string name="my_prof_text1">My Profile</string>
     <string name="per_details_text1">Personal Details</string>
     <string name="email_text_inp1">Email</string>
@@ -74,7 +74,7 @@
     <string name="addToCart_Text1">Add To Cart</string>
     <string name="order_now_Text1">Order Now</string>
 
-<!--    place order strings here....-->
+    <!--    place order strings here....-->
     <string name="place_order_text1">Place Order</string>
     <string name="place_existing_text1">Place to existing address</string>
     <string name="plc_or_con_name_text1">Contact Name</string>
@@ -82,4 +82,8 @@
     <string name="plc_or_city_text1">City</string>
     <string name="plc_or_mobile_text1">Contact Number</string>
     <string name="plc_or_btn_text1">Proceed to Order</string>
+
+
+<!--    Recipe Section strings....-->
+    <string name="pr_recipe_heading_text1">Product Recipe</string>
 </resources>

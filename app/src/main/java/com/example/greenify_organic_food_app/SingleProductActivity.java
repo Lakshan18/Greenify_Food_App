@@ -24,7 +24,7 @@ import java.util.List;
 public class SingleProductActivity extends AppCompatActivity {
 
     TextView productNameTextView, productPriceTextView, productDescriptionTextView, quantityTextView;
-    ImageView productImage,increaseBtn,decreaseBtn;
+    ImageView productImage,increaseBtn,decreaseBtn,recipeSecBtn;
     ProductModel product;
 
     private RecyclerView ingredientRecyclerView;
@@ -128,6 +128,15 @@ public class SingleProductActivity extends AppCompatActivity {
                     quantityTextView.setText(String.valueOf(quantity));
                     updatePrice();
                 }
+            }
+        });
+
+        recipeSecBtn = findViewById(R.id.recipe_sec_btn);
+        recipeSecBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SingleProductActivity.this,ProductRecipeActivity.class);
+                startActivity(intent);
             }
         });
     }
