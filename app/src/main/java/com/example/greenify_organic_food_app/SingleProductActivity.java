@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,8 +23,8 @@ import java.util.List;
 
 public class SingleProductActivity extends AppCompatActivity {
 
-    TextView productNameTextView, productPriceTextView, productDescriptionTextView;
-    ImageView productImage;
+    TextView productNameTextView, productPriceTextView, productDescriptionTextView, quantityTextView;
+    ImageView productImage,increaseBtn,decreaseBtn;
     ProductModel product;
 
     private RecyclerView ingredientRecyclerView;
@@ -33,34 +34,36 @@ public class SingleProductActivity extends AppCompatActivity {
     private NutritionItemAdapter nutritionAdapter;
     private List<NutritionItemModel> nutritionList;
 
+    private int quantity = 1;  // Initial quantity is 1
+    private double price;
+    private final int MAX_QUANTITY = 10;  // Maximum quantity limit
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_single_product);  // Use your layout for product details
+        setContentView(R.layout.activity_single_product);
 
         productNameTextView = findViewById(R.id.productNameTextView);
         productPriceTextView = findViewById(R.id.productPriceTextView);
         productDescriptionTextView = findViewById(R.id.productDescriptionTextView);
         productImage = findViewById(R.id.productImage);
+        quantityTextView = findViewById(R.id.sgl_pr_qty);  // TextView to show quantity
 
-        // Retrieve the ProductModel object from the Intent
         product = (ProductModel) getIntent().getSerializableExtra("product");
 
         if (product != null) {
-            // Set the product details in the views
             productNameTextView.setText(product.getTitle());
-            productPriceTextView.setText("Rs: " + product.getPrice());
+            price = product.getPrice();  // Get the price
+            updatePrice();  // Display the formatted price
             productDescriptionTextView.setText(product.getDescription());
-
-            // Set the product image
-            productImage.setImageResource(product.getImage());  // Set image using the resource ID
+            productImage.setImageResource(product.getImage());
         }
 
         ImageView backTo = findViewById(R.id.backTo_View1);
         backTo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SingleProductActivity.this,HomeActivity.class);
+                Intent intent = new Intent(SingleProductActivity.this, HomeActivity.class);
                 startActivity(intent);
             }
         });
@@ -78,12 +81,9 @@ public class SingleProductActivity extends AppCompatActivity {
         ingredientRecyclerView.setLayoutManager(layoutManager);
         ingredientRecyclerView.setAdapter(ingredientsAdapter);
 
-//        nutritions data....
-
         nutritionRecyclerView = findViewById(R.id.nutritionRecyclerView);
         nutritionRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Dummy data (replace with database data)
         nutritionList = new ArrayList<>();
         nutritionList.add(new NutritionItemModel("Carbohydrate", 50));
         nutritionList.add(new NutritionItemModel("Protein", 25));
@@ -97,9 +97,44 @@ public class SingleProductActivity extends AppCompatActivity {
         orderNowBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SingleProductActivity.this,PlaceOrderActivity.class);
+                Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
                 startActivity(intent);
             }
         });
+
+        // Increase and decrease buttons
+        increaseBtn = findViewById(R.id.sgl_increase_btn);
+        decreaseBtn = findViewById(R.id.sgl_decrease_btn);
+
+        increaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (quantity < MAX_QUANTITY) {
+                    quantity++;
+                    quantityTextView.setText(String.valueOf(quantity));
+                    updatePrice();
+                } else {
+                    // Show Toast if quantity exceeds the limit
+                    Toast.makeText(SingleProductActivity.this, "Maximum quantity is " + MAX_QUANTITY, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        decreaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (quantity > 1) {
+                    quantity--;
+                    quantityTextView.setText(String.valueOf(quantity));
+                    updatePrice();
+                }
+            }
+        });
+    }
+
+    private void updatePrice() {
+        double totalPrice = price * quantity;
+        String formattedPrice = String.format("%.2f", totalPrice);
+        productPriceTextView.setText("Rs: " + formattedPrice);
     }
 }
