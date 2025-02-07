@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Greenify_Organic_Food_App</string>
 
+    <string name="customer_app_name">Greenify Foods</string>
+    <string name="deliver_app_name">Greenify Delivery</string>
+
     <!--    Splash screen strings...-->
     <string name="splash_text1">Welcome to</string>
     <string name="splash_text2">Greenify </string>
@@ -84,6 +87,6 @@
     <string name="plc_or_btn_text1">Proceed to Order</string>
 
 
-<!--    Recipe Section strings....-->
+    <!--    Recipe Section strings....-->
     <string name="pr_recipe_heading_text1">Product Recipe</string>
 </resources>

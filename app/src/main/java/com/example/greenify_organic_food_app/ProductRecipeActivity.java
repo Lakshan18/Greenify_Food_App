@@ -2,11 +2,9 @@ package com.example.greenify_organic_food_app;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.MediaController;
-import android.widget.VideoView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.greenify_organic_food_app.R;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.PlayerView;

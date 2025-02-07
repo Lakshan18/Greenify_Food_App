@@ -28,6 +28,7 @@ public class MyCartFragment extends Fragment {
     private Button btnCheckout;
     private TextView emptyCartMessage;
     private View cartSummaryLayout;
+    private static final int MAX_QUANTITY = 5;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,7 +41,7 @@ public class MyCartFragment extends Fragment {
         txtTotal = view.findViewById(R.id.totalAmount);
         btnCheckout = view.findViewById(R.id.checkoutButton);
         emptyCartMessage = view.findViewById(R.id.emptyCartMessage);
-        cartSummaryLayout = view.findViewById(R.id.cartSummaryLayout);  // Initialize cartSummaryLayout
+        cartSummaryLayout = view.findViewById(R.id.cartSummaryLayout);
 
         cartItems = new ArrayList<>();
         cartItems.add(new CartModel("Special Vegetable Salad", 1, 350.00, R.drawable.pumpkin_pancackes));
@@ -53,7 +54,6 @@ public class MyCartFragment extends Fragment {
         updateCartSummary();
 
         btnCheckout.setOnClickListener(v -> {
-            // Implement checkout functionality here...
             Toast.makeText(getContext(), "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
         });
 
@@ -63,10 +63,14 @@ public class MyCartFragment extends Fragment {
     private void updateCartSummary() {
         double subtotal = 0;
         for (CartModel item : cartItems) {
+            if (item.getQuantity() > MAX_QUANTITY) {
+                item.setQuantity(MAX_QUANTITY);
+                Toast.makeText(getContext(), "Maximum quantity reached (5 items per product).", Toast.LENGTH_SHORT).show();
+            }
             subtotal += item.getPrice() * item.getQuantity();
         }
 
-        double discount = subtotal * 0.05; // 5% Discount
+        double discount = subtotal * 0.05;
         double total = subtotal - discount;
 
         txtSubtotal.setText(String.format("Rs: %.2f", subtotal));
