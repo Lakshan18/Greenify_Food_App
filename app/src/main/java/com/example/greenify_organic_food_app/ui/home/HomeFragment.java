@@ -21,6 +21,9 @@ import com.example.greenify_organic_food_app.model.CategoryAdapter;
 import com.example.greenify_organic_food_app.model.CategoryModel;
 import com.example.greenify_organic_food_app.model.ProductAdapter;
 import com.example.greenify_organic_food_app.model.ProductModel;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +40,15 @@ public class HomeFragment extends Fragment {
     private Handler sliderHandler = new Handler();
     private Runnable sliderRunnable;
 
+    private FirebaseFirestore db;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        db = FirebaseFirestore.getInstance();
 
         viewPager = view.findViewById(R.id.viewPager);
 
@@ -57,15 +64,8 @@ public class HomeFragment extends Fragment {
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         categoryList = new ArrayList<>();
-        categoryList.add(new CategoryModel(R.drawable.org_food1, "Organic Food"));
-        categoryList.add(new CategoryModel(R.drawable.tasty_vegetable_salad, "Vegetable Salad"));
-        categoryList.add(new CategoryModel(R.drawable.appetizers1, "Appetizers"));
-        categoryList.add(new CategoryModel(R.drawable.org_breakfast, "Breakfast"));
-        categoryList.add(new CategoryModel(R.drawable.gluten_free, "Gluten Free"));
-        categoryList.add(new CategoryModel(R.drawable.entrees, "Entrees"));
-        categoryList.add(new CategoryModel(R.drawable.kid_recipies, "Kid Recipes"));
-        categoryList.add(new CategoryModel(R.drawable.sides, "Sides"));
-        categoryList.add(new CategoryModel(R.drawable.food_drinks, "Drinks"));
+
+        fetchCategoriesFromFirebase();
 
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         categoryRecyclerView.setAdapter(categoryAdapter);
@@ -85,6 +85,55 @@ public class HomeFragment extends Fragment {
         productRecyclerView.setAdapter(productAdapter);
 
         return view;
+    }
+
+    private void fetchCategoriesFromFirebase(){
+
+        db.collection("category")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if(querySnapshot != null){
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                // Assuming category documents have 'imageUrl' and 'name' fields
+                                String categoryName = document.getString("name");
+                                // Add category to the list
+                                assert categoryName != null;
+                                CategoryModel category = new CategoryModel(getCategoryImageResource(categoryName), categoryName);
+                                categoryList.add(category);
+                            }
+                            categoryAdapter.notifyDataSetChanged();
+                        }else{
+                            task.getException().printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    private int getCategoryImageResource(String categoryName) {
+        switch (categoryName) {
+            case "Organic Food":
+                return R.drawable.org_food1;
+            case "Vegetable Salad":
+                return R.drawable.tasty_vegetable_salad;
+            case "Appetizers":
+                return R.drawable.appetizers1;
+            case "Breakfast":
+                return R.drawable.org_breakfast;
+            case "Gluten Free":
+                return R.drawable.gluten_free;
+            case "Entrees":
+                return R.drawable.entrees;
+            case "Kid Recipes":
+                return R.drawable.kid_recipies;
+            case "Sides":
+                return R.drawable.sides;
+            case "Drinks":
+                return R.drawable.food_drinks;
+            default:
+                return R.drawable.default_category; // Default image in case category name is not recognized
+        }
     }
 
     private List<String> getImageList() {
