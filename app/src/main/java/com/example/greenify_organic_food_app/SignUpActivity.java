@@ -2,8 +2,13 @@ package com.example.greenify_organic_food_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,7 +16,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SignUpActivity extends AppCompatActivity {
+
+    private EditText nameInput, mobileInput, emailInput, passwordInput;
+    private Button signupBtn;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,13 +37,59 @@ public class SignUpActivity extends AppCompatActivity {
             return insets;
         });
 
+        db = FirebaseFirestore.getInstance();
+
+        nameInput = findViewById(R.id.name_signup_EditText1);
+        mobileInput = findViewById(R.id.mobile_signup_EditText1);
+        emailInput = findViewById(R.id.email_signup_EditText1);
+        passwordInput = findViewById(R.id.password_signup_EditText1);
+        signupBtn = findViewById(R.id.signup_btn);
+
         TextView textView = findViewById(R.id.go_to_signin);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
-                startActivity(intent);
-            }
+        textView.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
+            startActivity(intent);
         });
+
+        signupBtn.setOnClickListener(v -> validateAndRegisterUser());
+    }
+
+    private void validateAndRegisterUser() {
+        String cusName = nameInput.getText().toString().trim();
+        String cusMobile = mobileInput.getText().toString().trim();
+        String cusEmail = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
+
+        if (TextUtils.isEmpty(cusName)) {
+            nameInput.setError("Name is required");
+            return;
+        }
+        if (TextUtils.isEmpty(cusMobile) || cusMobile.length() != 10) {
+            mobileInput.setError("Enter a valid 10-digit mobile number");
+            return;
+        }
+        if (TextUtils.isEmpty(cusEmail) || !Patterns.EMAIL_ADDRESS.matcher(cusEmail).matches()) {
+            emailInput.setError("Enter a valid email address");
+            return;
+        }
+        if (TextUtils.isEmpty(password) || password.length() < 10) {
+            passwordInput.setError("Password must be at least 10 characters");
+            return;
+        }
+
+        Map<String, Object> customer = new HashMap<>();
+        customer.put("name", cusName);
+        customer.put("mobile", cusMobile);
+        customer.put("email", cusEmail);
+        customer.put("password", password);
+
+        db.collection("customer")
+                .add(customer)
+                .addOnSuccessListener(documentReference -> {
+                    CustomToast.showToast(SignUpActivity.this,"Registration Successful!",true);
+                    startActivity(new Intent(SignUpActivity.this, SignInActivity.class));
+                    finish();
+                })
+                .addOnFailureListener(e -> CustomToast.showToast(SignUpActivity.this,"Something went wrong.!",false));
     }
 }

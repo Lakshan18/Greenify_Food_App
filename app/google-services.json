@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "614952090779",
+    "project_id": "greenify-food-app-db",
+    "storage_bucket": "greenify-food-app-db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:614952090779:android:da59e85798f2cd11e6da3e",
+        "android_client_info": {
+          "package_name": "com.example.greenify_organic_food_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwetcznDVrNvjAIOG4uIwRp4OBoCpMayw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
