@@ -78,6 +78,8 @@ public class SignUpActivity extends AppCompatActivity {
             customer.put("mobile", cusMobile);
             customer.put("email", cusEmail);
             customer.put("password", cusPassword);
+            customer.put("username", null);
+            customer.put("profile_img", null);
 
             db.collection("customer")
                     .add(customer)

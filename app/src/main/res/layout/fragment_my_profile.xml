@@ -8,32 +8,6 @@
     android:background="#F8F8F8"
     tools:context=".ui.my_profile.MyProfileFragment">
 
-<!--    &lt;!&ndash; Back Button &ndash;&gt;-->
-<!--    <ImageView-->
-<!--        android:id="@+id/backTo_View"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="20dp"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:srcCompat="@drawable/baseline_arrow_back_ios_new_24" />-->
-
-<!--    &lt;!&ndash; Title &ndash;&gt;-->
-<!--    <TextView-->
-<!--        android:id="@+id/textView10"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--        android:fontFamily="@font/roboto"-->
-<!--        android:text="My Profile"-->
-<!--        android:textSize="20sp"-->
-<!--        android:textStyle="bold"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-    <!-- ScrollView -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -128,15 +102,6 @@
                 android:fontFamily="@font/roboto"
                 android:textStyle="bold" />
 
-<!--            <EditText-->
-<!--                android:id="@+id/edit_name"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="10dp"-->
-<!--                android:background="@drawable/input_bg"-->
-<!--                android:hint="name"-->
-<!--                android:padding="10dp" />-->
-
             <EditText
                 android:id="@+id/edit_email"
                 android:layout_width="match_parent"
@@ -218,15 +183,6 @@
                     android:focusable="false"
                     android:clickable="true"/>
             </com.google.android.material.textfield.TextInputLayout>
-
-            <EditText
-                android:id="@+id/edit_postal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/input_bg"
-                android:hint="@string/pos_text_inp4"
-                android:padding="10dp" />
 
             <Button
                 android:id="@+id/btn_update_delivery"
