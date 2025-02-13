@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SingleProductActivity extends AppCompatActivity {
 
@@ -79,11 +80,6 @@ public class SingleProductActivity extends AppCompatActivity {
         nutritionRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         nutritionList = new ArrayList<>();
-        nutritionList.add(new NutritionItemModel("Carbohydrate", 50));
-        nutritionList.add(new NutritionItemModel("Protein", 25));
-        nutritionList.add(new NutritionItemModel("Vitamins", 85));
-        nutritionList.add(new NutritionItemModel("Fats", 10));
-
         nutritionAdapter = new NutritionItemAdapter(this, nutritionList);
         nutritionRecyclerView.setAdapter(nutritionAdapter);
 
@@ -153,6 +149,22 @@ public class SingleProductActivity extends AppCompatActivity {
                         Glide.with(this).load(imageUrl).into(productImage);
 
                         loadIngredientImages(ingList);
+
+                        Map<String, Long> nutritionMap = (Map<String, Long>) documentSnapshot.get("nutrition");
+                        if (nutritionMap != null) {
+                            nutritionList = new ArrayList<>();
+                            for (Map.Entry<String, Integer> entry : nutritionMap.entrySet()) {
+                                String nutrientName = entry.getKey();
+                                int nutrientPercentage = entry.getValue();
+                                nutritionList.add(new NutritionItemModel(nutrientName, nutrientPercentage));
+                            }
+
+                            nutritionAdapter = new NutritionItemAdapter(this, nutritionList);
+                            nutritionRecyclerView.setAdapter(nutritionAdapter);
+                        } else {
+                            Log.d("FirestoreDb", "No nutrition data found for this product.");
+                        }
+
                     } else {
                         Toast.makeText(this, "Product details not found", Toast.LENGTH_SHORT).show();
                     }
