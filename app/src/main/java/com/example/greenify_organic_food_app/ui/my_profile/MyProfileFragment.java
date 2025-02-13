@@ -173,31 +173,58 @@ public class MyProfileFragment extends Fragment {
             return;
         }
 
-        // Update user data in Firestore
-        if (imageUri != null) {
-            // Upload the image to Firebase Storage
-            StorageReference storageReference = firebaseStorage.getReference()
-                    .child("images/customer_profile_images/" + System.currentTimeMillis() + ".jpg");
+        // Retrieve customer mobile number from SharedPreferences or Firestore
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
 
-            storageReference.putFile(imageUri)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            storageReference.getDownloadUrl().addOnCompleteListener(task1 -> {
-                                if (task1.isSuccessful()) {
-                                    String downloadUrl = task1.getResult().toString();
-                                    updateFirestore(username, downloadUrl);
-                                } else {
-                                    Toast.makeText(requireContext(), "Failed to get image URL", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        } else {
-            // If no new image, just update username
-            updateFirestore(username, currentProfileImageUrl);
+        if (customerEmail == null) {
+            Toast.makeText(requireContext(), "Customer email not found!", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        // Fetch customer mobile number from Firestore
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerMobile = document.getString("mobile");
+
+                        if (customerMobile == null || customerMobile.isEmpty()) {
+                            Toast.makeText(requireContext(), "Customer mobile number not found!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // Update user data in Firestore
+                        if (imageUri != null) {
+                            // Upload the image to Firebase Storage using the customer's mobile number
+                            StorageReference storageReference = firebaseStorage.getReference()
+                                    .child("images/customer_profile_images/" + customerMobile + ".jpg");
+
+                            storageReference.putFile(imageUri)
+                                    .addOnCompleteListener(uploadTask -> {
+                                        if (uploadTask.isSuccessful()) {
+                                            storageReference.getDownloadUrl().addOnCompleteListener(urlTask -> {
+                                                if (urlTask.isSuccessful()) {
+                                                    String downloadUrl = urlTask.getResult().toString();
+                                                    updateFirestore(username, downloadUrl);
+                                                } else {
+                                                    Toast.makeText(requireContext(), "Failed to get image URL", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        } else {
+                                            Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        } else {
+                            // If no new image, just update username
+                            updateFirestore(username, currentProfileImageUrl);
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Customer data not found!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void updateFirestore(String username, String profileImageUrl) {

@@ -1,17 +1,16 @@
 package com.example.greenify_organic_food_app.model;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
 
 import java.util.List;
@@ -41,32 +40,38 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        CartModel item = cartItems.get(position);
-        holder.itemName.setText(item.getName());
-        holder.itemPrice.setText("Rs: " + item.getPrice());
-        holder.itemQuantity.setText(String.valueOf(item.getQuantity()));
-        holder.itemImage.setImageResource(item.getImageResource());
+        CartModel cartItem = cartItems.get(position);
+
+        holder.itemName.setText(cartItem.getProductName());
+        String formattedPrice = String.format("Rs: %.2f", cartItem.getPrice());
+        holder.itemPrice.setText(formattedPrice);
+        holder.itemQuantity.setText(String.valueOf(cartItem.getQuantity()));
+
+        Glide.with(context)
+                .load(cartItem.getImage())
+                .into(holder.itemImage);
 
         holder.btnIncrease.setOnClickListener(v -> {
-            item.setQuantity(item.getQuantity() + 1);
+            int currentQuantity = cartItem.getQuantity();
+            cartItem.setQuantity(currentQuantity + 1);
             notifyItemChanged(position);
             cartUpdateListener.onCartUpdated();
         });
 
         holder.btnDecrease.setOnClickListener(v -> {
-            if (item.getQuantity() > 1) {
-                item.setQuantity(item.getQuantity() - 1);
+            int currentQuantity = cartItem.getQuantity();
+            if (currentQuantity > 1) {
+                cartItem.setQuantity(currentQuantity - 1);
                 notifyItemChanged(position);
                 cartUpdateListener.onCartUpdated();
             }
         });
 
-        // Handle item removal safely
-        holder.itemView.setOnClickListener(v -> {
-            if (cartItems.size() > position) {
+        holder.btnRemove.setOnClickListener(v -> {
+            if (position < cartItems.size()) {
                 cartItems.remove(position);
-                notifyItemRemoved(position); // Notify the adapter that an item was removed
-                notifyItemRangeChanged(position, cartItems.size()); // Update the remaining items
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, cartItems.size());
                 cartUpdateListener.onCartUpdated();
             }
         });
@@ -77,7 +82,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         return cartItems.size();
     }
 
-    public class CartViewHolder extends RecyclerView.ViewHolder {
+    public static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView itemImage, btnIncrease, btnDecrease, btnRemove;
         TextView itemName, itemPrice, itemQuantity;
 

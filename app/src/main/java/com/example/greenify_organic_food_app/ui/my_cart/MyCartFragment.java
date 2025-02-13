@@ -1,6 +1,9 @@
 package com.example.greenify_organic_food_app.ui.my_cart;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.greenify_organic_food_app.R;
 import com.example.greenify_organic_food_app.model.CartAdapter;
 import com.example.greenify_organic_food_app.model.CartModel;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +34,14 @@ public class MyCartFragment extends Fragment {
     private TextView emptyCartMessage;
     private View cartSummaryLayout;
     private static final int MAX_QUANTITY = 5;
+    private FirebaseFirestore db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_cart, container, false);
+
+        db = FirebaseFirestore.getInstance();
 
         cartRecyclerView = view.findViewById(R.id.cartRecyclerView);
         txtSubtotal = view.findViewById(R.id.subTotal);
@@ -44,20 +52,72 @@ public class MyCartFragment extends Fragment {
         cartSummaryLayout = view.findViewById(R.id.cartSummaryLayout);
 
         cartItems = new ArrayList<>();
-        cartItems.add(new CartModel("Special Vegetable Salad", 1, 350.00, R.drawable.pumpkin_pancackes));
-        cartItems.add(new CartModel("Special Vegetable Salad", 1, 350.00, R.drawable.pumpkin_pancackes));
-
         cartAdapter = new CartAdapter(getContext(), cartItems, this::updateCartSummary);
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         cartRecyclerView.setAdapter(cartAdapter);
 
-        updateCartSummary();
+        fetchCartItems();
 
         btnCheckout.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Proceeding to checkout...", Toast.LENGTH_SHORT).show();
         });
 
         return view;
+    }
+
+    private void fetchCartItems() {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
+
+        if (customerEmail == null) {
+            Toast.makeText(getContext(), "Customer not logged in!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerId = document.getId(); // Get the customer ID
+
+                        db.collection("customer")
+                                .document(customerId)
+                                .collection("cart")
+                                .get()
+                                .addOnCompleteListener(cartTask -> {
+                                    if (cartTask.isSuccessful()) {
+                                        cartItems.clear();
+                                        for (DocumentSnapshot cartDocument : cartTask.getResult()) {
+                                            String productName = cartDocument.getString("productName");
+                                            Double price = cartDocument.getDouble("price");
+                                            String image = cartDocument.getString("image");
+                                            Long quantityLong = cartDocument.getLong("quantity");
+
+                                            if (productName == null || price == null || image == null || quantityLong == null) {
+                                                Log.e("MyCartFragment", "Invalid cart item data: " + cartDocument.getId());
+                                                continue;
+                                            }
+
+                                            int quantity = quantityLong.intValue();
+
+                                            CartModel cartItem = new CartModel(productName, quantity, price, image);
+                                            cartItems.add(cartItem);
+                                        }
+
+                                        cartAdapter.notifyDataSetChanged();
+                                        updateCartSummary();
+                                    } else {
+                                        Log.e("MyCartFragment", "Failed to fetch cart items: " + cartTask.getException().getMessage());
+                                        Toast.makeText(getContext(), "Failed to fetch cart items.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        Log.e("MyCartFragment", "Customer data not found for email: " + customerEmail);
+                        Toast.makeText(getContext(), "Customer data not found!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void updateCartSummary() {

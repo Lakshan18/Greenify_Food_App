@@ -1,6 +1,8 @@
 package com.example.greenify_organic_food_app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +86,11 @@ public class SingleProductActivity extends AppCompatActivity {
         nutritionAdapter = new NutritionItemAdapter(this, nutritionList);
         nutritionRecyclerView.setAdapter(nutritionAdapter);
 
+        Button addToCarBtn = findViewById(R.id.add_to_cart_btn);
+        addToCarBtn.setOnClickListener(v -> {
+            addProductToCart();
+        });
+
         Button orderNowBtn = findViewById(R.id.order_now_btn);
         orderNowBtn.setOnClickListener(v -> {
             Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
@@ -117,10 +125,68 @@ public class SingleProductActivity extends AppCompatActivity {
         });
     }
 
+    private void addProductToCart() {
+        if (product == null) {
+            Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SharedPreferences sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
+
+        if (customerEmail == null) {
+            Toast.makeText(this, "Customer not logged in!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerId = document.getId();
+
+                        String productId = product.getProductId(); // Use the product object
+                        String productName = product.getName(); // Use the product object
+                        double productPrice = product.getPrice(); // Use the product object
+                        String productImageUrl = product.getImageUrl(); // Use the product object
+                        int productQuantity = quantity;
+
+                        Log.d("SingleProductActivity", "Retrieved product name: " + productName);
+                        Log.d("SingleProductActivity", "Retrieved product id: " + productId);
+                        Log.d("SingleProductActivity", "Retrieved product price: " + productPrice);
+                        Log.d("SingleProductActivity", "Retrieved product image: " + productImageUrl);
+                        Log.d("SingleProductActivity", "Retrieved product qty: " + productQuantity);
+                        Log.d("SingleProductActivity", "Retrieved customer ID: " + customerId);
+
+                        Map<String, Object> cartItem = new HashMap<>();
+                        cartItem.put("productName", productName);
+                        cartItem.put("price", productPrice);
+                        cartItem.put("image", productImageUrl);
+                        cartItem.put("quantity", productQuantity);
+
+                        db.collection("customer")
+                                .document(customerId)
+                                .collection("cart")
+                                .document(productId)
+                                .set(cartItem)
+                                .addOnSuccessListener(aVoid -> {
+                                    CustomToast.showToast(SingleProductActivity.this, "Product added to cart!", true);
+                                })
+                                .addOnFailureListener(e -> {
+                                    CustomToast.showToast(SingleProductActivity.this, "Failed to add product to cart!", false);
+                                });
+                    } else {
+                        CustomToast.showToast(SingleProductActivity.this, "Customer data not found!", false);
+                    }
+                });
+    }
+
     private void updatePrice() {
-        double totalPrice = price * quantity;
-        String formattedPrice = String.format("%.2f", totalPrice);
-        productPriceTextView.setText("Rs: " + formattedPrice);
+        double totalPrice = price * quantity; // Use the updated price variable
+        String formattedPrice = String.format("Rs: %.2f", totalPrice); // Format the price
+        productPriceTextView.setText(formattedPrice); // Update the UI
     }
 
     private void fetchProductData(String productId) {
@@ -128,43 +194,50 @@ public class SingleProductActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String name = documentSnapshot.getString("name");
-                        String description = documentSnapshot.getString("description");
-                        String imageUrl = documentSnapshot.getString("image");
-                        price = documentSnapshot.getDouble("price");
+                        product = new ProductModel();
+
+                        product.setProductId(documentSnapshot.getId());
+                        product.setName(documentSnapshot.getString("name"));
+                        product.setDescription(documentSnapshot.getString("description"));
+                        product.setImageUrl(documentSnapshot.getString("image"));
+                        double fetchedPrice = documentSnapshot.getDouble("price");
+                        product.setPrice(fetchedPrice);
+                        price = fetchedPrice;
+
+                        Log.d("SingleProductActivity", "Fetched price: " + fetchedPrice);
+                        Log.d("SingleProductActivity", "Updated class-level price: " + price);
 
                         List<Long> ingListLong = (List<Long>) documentSnapshot.get("ing_list");
-                        List<Integer> ingList = new ArrayList<>();
                         if (ingListLong != null) {
+                            List<Integer> ingList = new ArrayList<>();
                             for (Long id : ingListLong) {
                                 ingList.add(id.intValue());
-
                             }
+                            product.setIngList(ingList);
                         }
-                        Log.d("FirestoreDebug", "Fetched Ingredient IDs: " + ingList);
-                        productNameTextView.setText(name);
-                        productDescriptionTextView.setText(description);
+
+                        productNameTextView.setText(product.getName());
+                        productDescriptionTextView.setText(product.getDescription());
                         updatePrice();
+                        Glide.with(this).load(product.getImageUrl()).into(productImage);
 
-                        Glide.with(this).load(imageUrl).into(productImage);
+                        if (product.getIngList() != null) {
+                            loadIngredientImages(product.getIngList());
+                        }
 
-                        loadIngredientImages(ingList);
-
-                        Map<String, Long> nutritionMap = (Map<String, Long>) documentSnapshot.get("nutrition");
-                        if (nutritionMap != null) {
+                        Map<String, Long> nutritionMapLong = (Map<String, Long>) documentSnapshot.get("nutrition");
+                        if (nutritionMapLong != null) {
                             nutritionList = new ArrayList<>();
-                            for (Map.Entry<String, Integer> entry : nutritionMap.entrySet()) {
+                            for (Map.Entry<String, Long> entry : nutritionMapLong.entrySet()) {
                                 String nutrientName = entry.getKey();
-                                int nutrientPercentage = entry.getValue();
+                                int nutrientPercentage = entry.getValue().intValue();
                                 nutritionList.add(new NutritionItemModel(nutrientName, nutrientPercentage));
                             }
-
                             nutritionAdapter = new NutritionItemAdapter(this, nutritionList);
                             nutritionRecyclerView.setAdapter(nutritionAdapter);
                         } else {
                             Log.d("FirestoreDb", "No nutrition data found for this product.");
                         }
-
                     } else {
                         Toast.makeText(this, "Product details not found", Toast.LENGTH_SHORT).show();
                     }
@@ -210,5 +283,4 @@ public class SingleProductActivity extends AppCompatActivity {
                     Log.e("FirestoreDb", "Error fetching ingredients: " + e.getMessage());
                 });
     }
-
 }
