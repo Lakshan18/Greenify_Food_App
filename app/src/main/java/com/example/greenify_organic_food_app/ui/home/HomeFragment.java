@@ -75,17 +75,42 @@ public class HomeFragment extends Fragment {
 
         // Initialize Product List
         productList = new ArrayList<>();
-        productList.add(new ProductModel(R.drawable.hashbrown_waffles, "Hashbrown Waffles", 1500, "4.1"));
-        productList.add(new ProductModel(R.drawable.pumpkin_pancackes, "Pumpkin Pancakes", 1200, "3.5"));
-        productList.add(new ProductModel(R.drawable.squash_muffins, "Squash Muffins", 750, "4.0"));
-        productList.add(new ProductModel(R.drawable.white_bean_salad, "White Bean Salad", 880, "4.2"));
-
-        // Set Adapter
         productAdapter = new ProductAdapter(productList, getContext());
         productRecyclerView.setAdapter(productAdapter);
+        // Fetch product data from Firebase
+        fetchProductsFromFirebase();
 
         return view;
     }
+
+    private void fetchProductsFromFirebase() {
+        db.collection("product")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                // Get product data from Firestore document
+                                String name = document.getString("name");
+                                String imageUrl = document.getString("image");
+                                double price = document.getDouble("price");
+                                String rating = document.getString("rating");
+                                String category = document.getString("category");
+                                String description = document.getString("description");
+
+                                // Add product to the list
+                                ProductModel product = new ProductModel(imageUrl, name, price, rating, category, description);
+                                productList.add(product);
+                            }
+                            productAdapter.notifyDataSetChanged();
+                        } else {
+                            task.getException().printStackTrace();
+                        }
+                    }
+                });
+    }
+
 
     private void fetchCategoriesFromFirebase(){
 

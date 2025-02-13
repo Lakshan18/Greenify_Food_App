@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
 import com.example.greenify_organic_food_app.SingleProductActivity;
 
@@ -40,8 +41,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         DecimalFormat decimalFormat = new DecimalFormat("Rs: #,##0.00");
         String formattedPrice = decimalFormat.format(product.getPrice());
 
-        holder.productImage.setImageResource(product.getImage());
-        holder.productTitle.setText(product.getTitle());
+        Glide.with(context).load(product.getImageUrl()).into(holder.productImage);
+        holder.productTitle.setText(product.getName());
         holder.productPrice.setText(formattedPrice); // Set formatted price
         holder.productRatingText.setText(product.getRating() + "/5");
 

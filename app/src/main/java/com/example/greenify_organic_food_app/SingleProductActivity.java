@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.model.IngredientsAdapter;
 import com.example.greenify_organic_food_app.model.NutritionItemAdapter;
 import com.example.greenify_organic_food_app.model.NutritionItemModel;
@@ -52,11 +53,13 @@ public class SingleProductActivity extends AppCompatActivity {
         product = (ProductModel) getIntent().getSerializableExtra("product");
 
         if (product != null) {
-            productNameTextView.setText(product.getTitle());
+            productNameTextView.setText(product.getName());
             price = product.getPrice();  // Get the price
             updatePrice();  // Display the formatted price
             productDescriptionTextView.setText(product.getDescription());
-            productImage.setImageResource(product.getImage());
+            Glide.with(this)
+                    .load(product.getImageUrl())  // Load image from URL
+                    .into(productImage);
         }
 
         ImageView backTo = findViewById(R.id.backTo_View1);
