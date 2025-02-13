@@ -49,6 +49,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(v -> {
             // Pass the ProductModel to SingleProductActivity
             Intent intent = new Intent(v.getContext(), SingleProductActivity.class);
+            intent.putExtra("p_id",product.getProductId());
             intent.putExtra("product", product);
             v.getContext().startActivity(intent);
         });

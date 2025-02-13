@@ -73,11 +73,9 @@ public class HomeFragment extends Fragment {
         productRecyclerView = view.findViewById(R.id.productRecyclerView);
         productRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 2 columns
 
-        // Initialize Product List
         productList = new ArrayList<>();
         productAdapter = new ProductAdapter(productList, getContext());
         productRecyclerView.setAdapter(productAdapter);
-        // Fetch product data from Firebase
         fetchProductsFromFirebase();
 
         return view;
@@ -91,7 +89,7 @@ public class HomeFragment extends Fragment {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null) {
                             for (QueryDocumentSnapshot document : querySnapshot) {
-                                // Get product data from Firestore document
+                                String productId = document.getId();
                                 String name = document.getString("name");
                                 String imageUrl = document.getString("image");
                                 double price = document.getDouble("price");
@@ -99,8 +97,7 @@ public class HomeFragment extends Fragment {
                                 String category = document.getString("category");
                                 String description = document.getString("description");
 
-                                // Add product to the list
-                                ProductModel product = new ProductModel(imageUrl, name, price, rating, category, description);
+                                ProductModel product = new ProductModel(productId,imageUrl, name, price, rating, category, description);
                                 productList.add(product);
                             }
                             productAdapter.notifyDataSetChanged();
@@ -121,9 +118,7 @@ public class HomeFragment extends Fragment {
                         QuerySnapshot querySnapshot = task.getResult();
                         if(querySnapshot != null){
                             for (QueryDocumentSnapshot document : querySnapshot) {
-                                // Assuming category documents have 'imageUrl' and 'name' fields
                                 String categoryName = document.getString("name");
-                                // Add category to the list
                                 assert categoryName != null;
                                 CategoryModel category = new CategoryModel(getCategoryImageResource(categoryName), categoryName);
                                 categoryList.add(category);
@@ -157,7 +152,7 @@ public class HomeFragment extends Fragment {
             case "Drinks":
                 return R.drawable.food_drinks;
             default:
-                return R.drawable.default_category; // Default image in case category name is not recognized
+                return R.drawable.default_category;
         }
     }
 
