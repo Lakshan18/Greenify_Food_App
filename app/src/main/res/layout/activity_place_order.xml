@@ -30,6 +30,7 @@
                     android:layout_height="wrap_content"
                     android:text="Place Order"
                     android:textSize="20sp"
+                    android:textColor="@color/black"
                     android:textStyle="bold"
                     android:fontFamily="@font/roboto"
                     app:layout_constraintTop_toTopOf="parent"
@@ -114,6 +115,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/place_existing_text1"
                 android:textSize="18sp"
+                android:textColor="@color/black"
                 android:fontFamily="@font/roboto"
                 android:layout_marginTop="20dp"/>
 
@@ -130,6 +132,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/plc_or_con_name_text1"
+                    android:textColor="@color/black"
                     android:padding="10dp"
                     android:background="@drawable/input_bg"/>
 
@@ -138,6 +141,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/plc_or_address_text1"
+                    android:textColor="@color/black"
                     android:layout_marginTop="10dp"
                     android:padding="10dp"
                     android:background="@drawable/input_bg"/>
@@ -147,6 +151,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/plc_or_city_text1"
+                    android:textColor="@color/black"
                     android:layout_marginTop="10dp"
                     android:padding="10dp"
                     android:background="@drawable/input_bg"/>
@@ -157,6 +162,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/plc_or_mobile_text1"
                     android:layout_marginTop="10dp"
+                    android:textColor="@color/black"
                     android:inputType="phone"
                     android:padding="10dp"
                     android:background="@drawable/input_bg"/>
@@ -175,14 +181,6 @@
                 android:textColor="@color/white"
                 android:enabled="false"
                 android:layout_marginTop="20dp"/>
-
-            <WebView
-                android:id="@+id/payhereWebView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                android:layout_marginTop="20dp"
-                />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

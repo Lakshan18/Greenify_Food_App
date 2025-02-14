@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
             if ("MyProfileFragment".equals(fragmentName)) {
                 // Navigate to MyProfileFragment
                 getSupportFragmentManager().beginTransaction()
-                        .replace(com.stripe.android.R.id.fragment_container, new MyProfileFragment())
+                        .replace(androidx.fragment.R.id.fragment_container_view_tag, new MyProfileFragment())
                         .commit();
             }
         }

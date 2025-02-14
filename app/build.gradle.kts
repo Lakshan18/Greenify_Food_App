@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.greenify_organic_food_app"
-        minSdk = 35
+        minSdk = 28
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -56,13 +56,10 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation ("com.stripe:stripe-android:20.43.0")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.google.android.exoplayer:exoplayer:2.18.1")
 
     implementation ("com.github.PayHereDevs:payhere-android-sdk:v3.0.17")
     implementation ("androidx.appcompat:appcompat:1.6.0")
     implementation ("com.google.code.gson:gson:2.8.0")
-
-
 }

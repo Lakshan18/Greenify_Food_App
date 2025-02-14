@@ -222,48 +222,55 @@ public class PlaceOrderActivity extends AppCompatActivity {
         btnProceed.setOnClickListener(v -> initiatePayment(orderDataModel2));
     }
 
-    public void initiatePayment(OrderDataModel orderDataModel) {
+    private  void initiatePayment(OrderDataModel orderDataModel){
         InitRequest req = new InitRequest();
-        req.setMerchantId("1221485"); // ✅ Replace with your PayHere Merchant ID
-        req.setCurrency("LKR"); // ✅ Change if needed (LKR, USD, GBP, etc.)
-        req.setAmount(orderDataModel.getTotalPrice()); // ✅ Total amount
-        req.setOrderId(orderDataModel.getOrderId()); // ✅ Unique order ID
-        req.setItemsDescription("Organic Food Order"); // ✅ Description
-
-        // Customer details
-        req.getCustomer().setFirstName(orderDataModel.getCustomerName());
-        req.getCustomer().setLastName("");
-        req.getCustomer().setEmail(orderDataModel.getEmail());
-        req.getCustomer().setPhone(orderDataModel.getMobile());
-        req.getCustomer().getAddress().setAddress(orderDataModel.getAddress());
-        req.getCustomer().getAddress().setCity("");
+        req.setMerchantId("1222541");
+        req.setCurrency("LKR");
+        req.setAmount(100.00);
+        req.setOrderId("test_order_12345");
+        req.setItemsDescription("Test Order");
+        req.getCustomer().setFirstName("Test");
+        req.getCustomer().setLastName("User");
+        req.getCustomer().setEmail("test@example.com");
+        req.getCustomer().setPhone("0771234567");
+        req.getCustomer().getAddress().setAddress("Test Address");
+        req.getCustomer().getAddress().setCity("Colombo");
         req.getCustomer().getAddress().setCountry("Sri Lanka");
 
-        // Notify URL (Optional)
-        req.setNotifyUrl("");
+        Log.d("PAYMENT_REQUEST", "Request: " + req.toString());
 
-        // Intent to open PayHere Payment Activity
         Intent intent = new Intent(this, PHMainActivity.class);
         intent.putExtra(PHConstants.INTENT_EXTRA_DATA, req);
-        PHConfigs.setBaseUrl(PHConfigs.SANDBOX_URL); // ✅ Use SANDBOX for testing
+        PHConfigs.setBaseUrl(PHConfigs.SANDBOX_URL);
         startActivityForResult(intent, PAYHERE_REQUEST);
     }
 
-    // Handle Payment Response
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PAYHERE_REQUEST && data != null && data.hasExtra(PHConstants.INTENT_EXTRA_RESULT)) {
             PHResponse<StatusResponse> response = (PHResponse<StatusResponse>) data.getSerializableExtra(PHConstants.INTENT_EXTRA_RESULT);
+
             if (resultCode == Activity.RESULT_OK) {
-                if (response != null && response.isSuccess()) {
-                    Log.d("PAYMENT", "Payment Successful: " + response.getData().toString());
+                if (response != null) {
+                    Log.d("PAYMENT_RESPONSE", "Success: " + response.isSuccess());
+                    Log.d("PAYMENT_RESPONSE", "Message: " + response.toString());
+
+                    if (response.isSuccess()) {
+                        Toast.makeText(this, "Payment Successful!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Payment Failed: " + response.toString(), Toast.LENGTH_LONG).show();
+                    }
                 } else {
-                    Log.d("PAYMENT", "Payment Failed: " + response.toString());
+                    Log.d("PAYMENT_RESPONSE", "Response is null");
+                    Toast.makeText(this, "Payment response is null!", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Log.d("PAYMENT", "User Canceled Payment");
+                Log.d("PAYMENT_RESPONSE", "User Canceled Payment or Error Occurred");
+                Toast.makeText(this, "Payment Canceled!", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            Log.d("PAYMENT_RESPONSE", "Invalid request code or no data received");
         }
     }
 
