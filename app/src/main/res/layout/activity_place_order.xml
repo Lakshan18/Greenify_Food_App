@@ -60,7 +60,7 @@
 
                 <!-- Product Image -->
                 <ImageView
-                    android:id="@+id/product_image"
+                    android:id="@+id/order_product_image"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:scaleType="centerCrop"
@@ -75,30 +75,30 @@
                     android:layout_weight="1">
 
                     <TextView
-                        android:id="@+id/product_name"
+                        android:id="@+id/order_product_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Product Name"
+                        android:text=""
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/roboto"
                         android:textColor="@color/black"/>
 
                     <TextView
-                        android:id="@+id/selected_quantity"
+                        android:id="@+id/order_selected_quantity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="@font/roboto"
-                        android:text="Quantity: 1"
+                        android:text=""
                         android:textColor="#8A8A8A"
                         android:textSize="16sp" />
 
                     <TextView
-                        android:id="@+id/total_price"
+                        android:id="@+id/order_total_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total: $0.00"
+                        android:text=""
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/roboto"
@@ -176,6 +176,13 @@
                 android:enabled="false"
                 android:layout_marginTop="20dp"/>
 
+            <WebView
+                android:id="@+id/payhereWebView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:layout_marginTop="20dp"
+                />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -93,7 +93,20 @@ public class SingleProductActivity extends AppCompatActivity {
 
         Button orderNowBtn = findViewById(R.id.order_now_btn);
         orderNowBtn.setOnClickListener(v -> {
+            if (product == null) {
+                Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            double totalPrice = product.getPrice() * quantity;
+
             Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
+
+            intent.putExtra("productName", product.getName());
+            intent.putExtra("productImageUrl", product.getImageUrl());
+            intent.putExtra("productPrice", totalPrice);
+            intent.putExtra("productQuantity", quantity);
+
             startActivity(intent);
         });
 

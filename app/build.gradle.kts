@@ -59,4 +59,10 @@ dependencies {
     implementation ("com.stripe:stripe-android:20.43.0")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.google.android.exoplayer:exoplayer:2.18.1")
+
+    implementation ("com.github.PayHereDevs:payhere-android-sdk:v3.0.17")
+    implementation ("androidx.appcompat:appcompat:1.6.0")
+    implementation ("com.google.code.gson:gson:2.8.0")
+
+
 }
