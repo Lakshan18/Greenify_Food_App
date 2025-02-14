@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,15 +32,20 @@ public class MyCartFragment extends Fragment {
     private List<CartModel> cartItems;
     private TextView txtSubtotal, txtDiscount, txtTotal;
     private Button btnCheckout;
+    private ImageView btnReomveCartItem;
     private TextView emptyCartMessage;
     private View cartSummaryLayout;
     private static final int MAX_QUANTITY = 5;
     private FirebaseFirestore db;
+    private SharedPreferences sharedPreferences; // Declare here, initialize later
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_cart, container, false);
+
+        // Initialize SharedPreferences here
+        sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 
         db = FirebaseFirestore.getInstance();
 
@@ -48,6 +54,7 @@ public class MyCartFragment extends Fragment {
         txtDiscount = view.findViewById(R.id.discount);
         txtTotal = view.findViewById(R.id.totalAmount);
         btnCheckout = view.findViewById(R.id.checkoutButton);
+        btnReomveCartItem = view.findViewById(R.id.remove_cart_item);
         emptyCartMessage = view.findViewById(R.id.emptyCartMessage);
         cartSummaryLayout = view.findViewById(R.id.cartSummaryLayout);
 
@@ -66,7 +73,6 @@ public class MyCartFragment extends Fragment {
     }
 
     private void fetchCartItems() {
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
         if (customerEmail == null) {
@@ -80,7 +86,7 @@ public class MyCartFragment extends Fragment {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                        String customerId = document.getId(); // Get the customer ID
+                        String customerId = document.getId();
 
                         db.collection("customer")
                                 .document(customerId)

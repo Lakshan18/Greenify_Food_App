@@ -6,12 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private List<CartModel> cartItems;
     private Context context;
     private OnCartUpdateListener cartUpdateListener;
+    private FirebaseFirestore db;
 
     public interface OnCartUpdateListener {
         void onCartUpdated();
@@ -29,6 +32,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         this.context = context;
         this.cartItems = cartItems;
         this.cartUpdateListener = cartUpdateListener;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -68,13 +72,54 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         });
 
         holder.btnRemove.setOnClickListener(v -> {
-            if (position < cartItems.size()) {
-                cartItems.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, cartItems.size());
-                cartUpdateListener.onCartUpdated();
-            }
+            removeCartItemFromFirestore(cartItem, position);
         });
+    }
+
+    private void removeCartItemFromFirestore(CartModel cartItem, int position) {
+        String customerEmail = context.getSharedPreferences("CustomerSession", Context.MODE_PRIVATE)
+                .getString("customerEmail", null);
+
+        if (customerEmail == null) {
+            Toast.makeText(context, "Customer not logged in!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String customerId = task.getResult().getDocuments().get(0).getId();
+
+                        db.collection("customer")
+                                .document(customerId)
+                                .collection("cart")
+                                .whereEqualTo("productName", cartItem.getProductName())
+                                .get()
+                                .addOnCompleteListener(cartTask -> {
+                                    if (cartTask.isSuccessful() && !cartTask.getResult().isEmpty()) {
+                                        String cartItemId = cartTask.getResult().getDocuments().get(0).getId();
+
+                                        db.collection("customer")
+                                                .document(customerId)
+                                                .collection("cart")
+                                                .document(cartItemId)
+                                                .delete()
+                                                .addOnSuccessListener(aVoid -> {
+                                                    cartItems.remove(position);
+                                                    notifyItemRemoved(position);
+                                                    notifyItemRangeChanged(position, cartItems.size());
+                                                    cartUpdateListener.onCartUpdated();
+                                                    Toast.makeText(context, "Item removed from cart", Toast.LENGTH_SHORT).show();
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Toast.makeText(context, "Failed to remove item from cart", Toast.LENGTH_SHORT).show();
+                                                });
+                                    }
+                                });
+                    }
+                });
     }
 
     @Override

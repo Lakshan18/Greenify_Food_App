@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.example.greenify_organic_food_app.CustomToast;
 import com.example.greenify_organic_food_app.R;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,22 +28,25 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MyProfileFragment extends Fragment {
 
     private FirebaseFirestore db;
     private FirebaseStorage firebaseStorage;
     private TextView profileName, profileUsername, profileMobile;
-    private EditText editEmail, editMobile, editUsername;
+    private EditText editEmail, editMobile, editUsername, editAddressLine1, editAddressLine2, editContactNumber;
     private AutoCompleteTextView districtDropdown;
     private List<String> districtList;
     private ArrayAdapter<String> adapter;
     private ImageView profileImage, editProfileIcon;
-    private Button updateButton;
+    private Button updateButton, btnUpdateDelivery;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private String currentProfileImageUrl;
+    private SharedPreferences sharedPreferences;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,17 +60,19 @@ public class MyProfileFragment extends Fragment {
         editEmail = view.findViewById(R.id.edit_email);
         editMobile = view.findViewById(R.id.edit_mobile);
         editUsername = view.findViewById(R.id.edit_username);
+        editAddressLine1 = view.findViewById(R.id.edit_address1);
+        editAddressLine2 = view.findViewById(R.id.edit_address2);
         districtDropdown = view.findViewById(R.id.district_dropdown);
         profileImage = view.findViewById(R.id.profile_image);
         editProfileIcon = view.findViewById(R.id.edit_profile);
         updateButton = view.findViewById(R.id.btn_update_personal);
+        btnUpdateDelivery = view.findViewById(R.id.btn_update_delivery);
 
         districtList = new ArrayList<>();
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, districtList);
         districtDropdown.setAdapter(adapter);
 
-        // Using SharedPreferences to get the customer data
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
         if (customerEmail != null) {
@@ -82,17 +88,19 @@ public class MyProfileFragment extends Fragment {
 
         updateButton.setOnClickListener(v -> updateProfile());
 
+        btnUpdateDelivery.setOnClickListener(v -> updateDeliveryAddress());
+
         return view;
     }
 
     private void loadCustomerDetails(String email) {
-        // Fetch user details from Firestore using the email stored in SharedPreferences
         db.collection("customer")
                 .whereEqualTo("email", email)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerId = document.getId();
                         String name = document.getString("name");
                         String username = document.getString("username");
                         String mobile = document.getString("mobile");
@@ -116,8 +124,29 @@ public class MyProfileFragment extends Fragment {
                                     .load(currentProfileImageUrl)
                                     .into(profileImage);
                         }
+                        loadCustomerDeliveryDetails(customerId);
                     } else {
                         Toast.makeText(requireContext(), "Customer data not found!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void loadCustomerDeliveryDetails(String cus_id){
+        db.collection("customer")
+                .document(cus_id)
+                .collection("customer_address")
+                .document("delivery_details")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        DocumentSnapshot document = task.getResult();
+                        String ads_line1 = document.getString("address_line1");
+                        String ads_line2 = document.getString("address_line2");
+                        String district = document.getString("district");
+
+                        editAddressLine1.setText(ads_line1 != null ? ads_line1 : "");
+                        editAddressLine2.setText(ads_line2 != null ? ads_line2 : "");
+                        districtDropdown.setText(district != null ? district : "", false);
                     }
                 });
     }
@@ -167,14 +196,12 @@ public class MyProfileFragment extends Fragment {
     private void updateProfile() {
         String username = editUsername.getText().toString();
 
-        // Check if username is empty
         if (username.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a username", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Retrieve customer mobile number from SharedPreferences or Firestore
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
         if (customerEmail == null) {
@@ -182,7 +209,6 @@ public class MyProfileFragment extends Fragment {
             return;
         }
 
-        // Fetch customer mobile number from Firestore
         db.collection("customer")
                 .whereEqualTo("email", customerEmail)
                 .get()
@@ -196,9 +222,7 @@ public class MyProfileFragment extends Fragment {
                             return;
                         }
 
-                        // Update user data in Firestore
                         if (imageUri != null) {
-                            // Upload the image to Firebase Storage using the customer's mobile number
                             StorageReference storageReference = firebaseStorage.getReference()
                                     .child("images/customer_profile_images/" + customerMobile + ".jpg");
 
@@ -218,11 +242,61 @@ public class MyProfileFragment extends Fragment {
                                         }
                                     });
                         } else {
-                            // If no new image, just update username
                             updateFirestore(username, currentProfileImageUrl);
                         }
                     } else {
                         Toast.makeText(requireContext(), "Customer data not found!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateDeliveryAddress() {
+        String addressLine1 = editAddressLine1.getText().toString().trim();
+        String addressLine2 = editAddressLine2.getText().toString().trim();
+        String district = districtDropdown.getText().toString().trim();
+        String contactNumber = sharedPreferences.getString("customerMobile",null);
+
+        if (addressLine1.isEmpty() || district.isEmpty() || contactNumber.isEmpty()) {
+            CustomToast.showToast(getContext(),"Please fill all required fields",false);
+            return;
+        }
+
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
+
+        if (customerEmail == null) {
+            CustomToast.showToast(getContext(),"Customer email not found!",false);
+            return;
+        }
+
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerId = document.getId();
+
+                        Map<String, Object> deliveryDetails = new HashMap<>();
+                        deliveryDetails.put("address_line1", addressLine1);
+                        deliveryDetails.put("address_line2", addressLine2);
+                        deliveryDetails.put("district", district);
+                        deliveryDetails.put("contact_number", contactNumber);
+
+                        db.collection("customer")
+                                .document(customerId)
+                                .collection("customer_address")
+                                .document("delivery_details")
+                                .set(deliveryDetails)
+                                .addOnCompleteListener(updateTask -> {
+                                    if (updateTask.isSuccessful()) {
+                                        CustomToast.showToast(getContext(),"Delivery address updated successfully!",true);
+                                    } else {
+                                        CustomToast.showToast(getContext(),"Failed to update delivery address",false);
+                                    }
+                                });
+                    } else {
+                       CustomToast.showToast(getContext(),"Customer data not found!",false);
                     }
                 });
     }

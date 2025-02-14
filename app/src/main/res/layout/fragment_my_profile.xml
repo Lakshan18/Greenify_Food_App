@@ -140,7 +140,6 @@
                 android:text="@string/btn_update_chg_text1"
                 android:textColor="@color/white" />
 
-            <!-- Delivery Details -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

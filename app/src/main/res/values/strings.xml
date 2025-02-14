@@ -83,7 +83,7 @@
     <string name="plc_or_city_text1">City</string>
     <string name="plc_or_mobile_text1">Contact Number</string>
     <string name="plc_or_btn_text1">Proceed to Order</string>
-
+    <string name="no_address_modal">Please update your profile. Go to the My Profile section.</string>
 
     <!--    Recipe Section strings....-->
     <string name="pr_recipe_heading_text1">Product Recipe</string>

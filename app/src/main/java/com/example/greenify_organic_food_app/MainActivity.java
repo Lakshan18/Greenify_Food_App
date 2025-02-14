@@ -13,6 +13,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.greenify_organic_food_app.ui.my_profile.MyProfileFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
@@ -27,6 +29,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("fragment")) {
+            String fragmentName = intent.getStringExtra("fragment");
+            if ("MyProfileFragment".equals(fragmentName)) {
+                // Navigate to MyProfileFragment
+                getSupportFragmentManager().beginTransaction()
+                        .replace(com.stripe.android.R.id.fragment_container, new MyProfileFragment())
+                        .commit();
+            }
+        }
 
         sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 
@@ -48,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
             long timeDifference = currentTime - lastLoginTime;
 
             if (timeDifference > 48 * 60 * 60 * 1000) {  // 48 hours in milliseconds
-                Intent intent = new Intent(MainActivity.this, SignInActivity.class);
-                startActivity(intent);
+                Intent intent1 = new Intent(MainActivity.this, SignInActivity.class);
+                startActivity(intent1);
                 finish();
             } else {
-                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(MainActivity.this, HomeActivity.class);
+                startActivity(intent2);
                 finish();
             }
         }
