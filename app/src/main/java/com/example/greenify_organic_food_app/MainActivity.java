@@ -30,16 +30,16 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("fragment")) {
-            String fragmentName = intent.getStringExtra("fragment");
-            if ("MyProfileFragment".equals(fragmentName)) {
-                // Navigate to MyProfileFragment
-                getSupportFragmentManager().beginTransaction()
-                        .replace(androidx.fragment.R.id.fragment_container_view_tag, new MyProfileFragment())
-                        .commit();
-            }
-        }
+//        Intent intent = getIntent();
+//        if (intent != null && intent.hasExtra("fragment")) {
+//            String fragmentName = intent.getStringExtra("fragment");
+//            if ("MyProfileFragment".equals(fragmentName)) {
+//                // Navigate to MyProfileFragment
+//                getSupportFragmentManager().beginTransaction()
+//                        .replace(, new MyProfileFragment())
+//                        .commit();
+//            }
+//        }
 
         sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 

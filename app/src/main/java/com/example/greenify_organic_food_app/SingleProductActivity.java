@@ -48,6 +48,8 @@ public class SingleProductActivity extends AppCompatActivity {
     private final int MAX_QUANTITY = 10;
 
     private FirebaseFirestore db;
+    private SharedPreferences sharedPreferences;
+    private boolean isProfileUpdated = false; // Boolean flag to track profile update status
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,8 @@ public class SingleProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_single_product);
 
         db = FirebaseFirestore.getInstance();
+        sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
 
         productNameTextView = findViewById(R.id.productNameTextView);
         productPriceTextView = findViewById(R.id.productPriceTextView);
@@ -87,28 +91,14 @@ public class SingleProductActivity extends AppCompatActivity {
         nutritionRecyclerView.setAdapter(nutritionAdapter);
 
         Button addToCarBtn = findViewById(R.id.add_to_cart_btn);
+        Button orderNowBtn = findViewById(R.id.order_now_btn);
+
         addToCarBtn.setOnClickListener(v -> {
-            addProductToCart();
+            checkProfileAndPerformAction(() -> addProductToCart());
         });
 
-        Button orderNowBtn = findViewById(R.id.order_now_btn);
         orderNowBtn.setOnClickListener(v -> {
-            if (product == null) {
-                Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            double totalPrice = product.getPrice() * quantity;
-
-            Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
-
-            intent.putExtra("productId",product.getProductId());
-            intent.putExtra("productName", product.getName());
-            intent.putExtra("productImageUrl", product.getImageUrl());
-            intent.putExtra("productPrice", totalPrice);
-            intent.putExtra("productQuantity", quantity);
-
-            startActivity(intent);
+            checkProfileAndPerformAction(() -> placeOrder());
         });
 
         increaseBtn = findViewById(R.id.sgl_increase_btn);
@@ -139,13 +129,7 @@ public class SingleProductActivity extends AppCompatActivity {
         });
     }
 
-    private void addProductToCart() {
-        if (product == null) {
-            Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        SharedPreferences sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
+    private void checkProfileAndPerformAction(Runnable action) {
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
         if (customerEmail == null) {
@@ -161,18 +145,57 @@ public class SingleProductActivity extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult().getDocuments().get(0);
                         String customerId = document.getId();
 
-                        String productId = product.getProductId(); // Use the product object
-                        String productName = product.getName(); // Use the product object
-                        double productPrice = product.getPrice(); // Use the product object
-                        String productImageUrl = product.getImageUrl(); // Use the product object
-                        int productQuantity = quantity;
+                        db.collection("customer")
+                                .document(customerId)
+                                .collection("customer_address")
+                                .document("delivery_details")
+                                .get()
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        if (task1.getResult().exists()) {
+                                            // Profile is updated, perform the action
+                                            isProfileUpdated = true;
+                                            action.run();
+                                        } else {
+                                            // Profile is not updated, show a toast
+                                            CustomToast.showToast(SingleProductActivity.this, "Please update your profile first!", false);
+                                        }
+                                    } else {
+                                        CustomToast.showToast(SingleProductActivity.this, "Failed to fetch profile details!", false);
+                                    }
+                                });
+                    } else {
+                        CustomToast.showToast(SingleProductActivity.this, "Customer data not found!", false);
+                    }
+                });
+    }
 
-                        Log.d("SingleProductActivity", "Retrieved product name: " + productName);
-                        Log.d("SingleProductActivity", "Retrieved product id: " + productId);
-                        Log.d("SingleProductActivity", "Retrieved product price: " + productPrice);
-                        Log.d("SingleProductActivity", "Retrieved product image: " + productImageUrl);
-                        Log.d("SingleProductActivity", "Retrieved product qty: " + productQuantity);
-                        Log.d("SingleProductActivity", "Retrieved customer ID: " + customerId);
+    private void addProductToCart() {
+        if (product == null) {
+            Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String customerEmail = sharedPreferences.getString("customerEmail", null);
+
+        if (customerEmail == null) {
+            Toast.makeText(this, "Customer not logged in!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("customer")
+                .whereEqualTo("email", customerEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String customerId = document.getId();
+
+                        String productId = product.getProductId();
+                        String productName = product.getName();
+                        double productPrice = product.getPrice();
+                        String productImageUrl = product.getImageUrl();
+                        int productQuantity = quantity;
 
                         Map<String, Object> cartItem = new HashMap<>();
                         cartItem.put("productName", productName);
@@ -197,10 +220,26 @@ public class SingleProductActivity extends AppCompatActivity {
                 });
     }
 
+    private void placeOrder() {
+        if (product == null) {
+            Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double totalPrice = product.getPrice() * quantity;
+
+        Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
+        intent.putExtra("productName", product.getName());
+        intent.putExtra("productImageUrl", product.getImageUrl());
+        intent.putExtra("productPrice", totalPrice);
+        intent.putExtra("productQuantity", quantity);
+        startActivity(intent);
+    }
+
     private void updatePrice() {
-        double totalPrice = price * quantity; // Use the updated price variable
-        String formattedPrice = String.format("Rs: %.2f", totalPrice); // Format the price
-        productPriceTextView.setText(formattedPrice); // Update the UI
+        double totalPrice = price * quantity;
+        String formattedPrice = String.format("Rs: %.2f", totalPrice);
+        productPriceTextView.setText(formattedPrice);
     }
 
     private void fetchProductData(String productId) {
@@ -217,18 +256,6 @@ public class SingleProductActivity extends AppCompatActivity {
                         double fetchedPrice = documentSnapshot.getDouble("price");
                         product.setPrice(fetchedPrice);
                         price = fetchedPrice;
-
-                        Log.d("SingleProductActivity", "Fetched price: " + fetchedPrice);
-                        Log.d("SingleProductActivity", "Updated class-level price: " + price);
-
-                        List<Long> ingListLong = (List<Long>) documentSnapshot.get("ing_list");
-                        if (ingListLong != null) {
-                            List<Integer> ingList = new ArrayList<>();
-                            for (Long id : ingListLong) {
-                                ingList.add(id.intValue());
-                            }
-                            product.setIngList(ingList);
-                        }
 
                         productNameTextView.setText(product.getName());
                         productDescriptionTextView.setText(product.getDescription());
@@ -280,13 +307,8 @@ public class SingleProductActivity extends AppCompatActivity {
 
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         String imageUrl = document.getString("ing_image");
-                        Integer fetchedId = document.getLong("ing_id").intValue(); // Fetch ing_id for debugging
-
                         if (imageUrl != null) {
                             ingredientImageUrls.add(imageUrl);
-                            Log.d("FirestoreDb", "Loaded Image for ing_id " + fetchedId + ": " + imageUrl);
-                        } else {
-                            Log.d("FirestoreDb", "No image found for ing_id: " + fetchedId);
                         }
                     }
 

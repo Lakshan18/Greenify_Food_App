@@ -295,15 +295,16 @@ public class PlaceOrderActivity extends AppCompatActivity {
 
     private void orderConfirmed(String customer_address,String customer_email) {
         Intent intent = getIntent();
-        String productId = intent.getStringExtra("productId");
+        String productName = intent.getStringExtra("productName");
         double productPrice = intent.getDoubleExtra("productPrice", 0.0);
         int productQuantity = intent.getIntExtra("productQuantity", 1);
+        String imageUrl = intent.getStringExtra("productImageUrl");
         String orderId = "ord_N" + System.currentTimeMillis();
         String currentDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         Map<String, Object> orderData = new HashMap<>();
         orderData.put("order_id", orderId);
-        orderData.put("product_id", productId);
+        orderData.put("product_name", productName);
         orderData.put("purchased_qty", productQuantity);
         orderData.put("unit_price", productPrice);
         orderData.put("total_price", productPrice * productQuantity);
@@ -312,6 +313,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         orderData.put("order_status", "Pending");
         orderData.put("customer_address",customer_address);
         orderData.put("date_time",currentDateTime);
+        orderData.put("product_image",imageUrl);
 
         db.collection("order")
                 .document(orderId)

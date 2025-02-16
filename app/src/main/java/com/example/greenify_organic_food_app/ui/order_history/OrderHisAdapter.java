@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
 import com.example.greenify_organic_food_app.model.OrderHisModel;
 
@@ -34,7 +36,10 @@ public class OrderHisAdapter extends RecyclerView.Adapter<OrderHisAdapter.OrderH
         holder.orderQuantity.setText("X " + order.getQuantity());
         holder.orderPrice.setText("Rs: " + order.getPrice());
         holder.orderDate.setText(order.getDate());
-        holder.orderImage.setImageResource(order.getImageResource());
+
+        Glide.with(holder.itemView.getContext())
+                .load(order.getProductImage())
+                .into(holder.orderImage);
     }
 
     @Override
