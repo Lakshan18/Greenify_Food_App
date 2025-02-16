@@ -6,15 +6,17 @@ public class OrderDataModel {
     private String email;
     private String address;
     private double totalPrice;
+    private String productName;
     private String orderId;
 
     // Constructor
-    public OrderDataModel(String customerName, String mobile, String email, String address, double totalPrice, String orderId) {
+    public OrderDataModel(String customerName, String mobile, String email, String address, double totalPrice,String productName, String orderId) {
         this.customerName = customerName;
         this.mobile = mobile;
         this.email = email;
         this.address = address;
         this.totalPrice = totalPrice;
+        this.productName = productName;
         this.orderId = orderId;
     }
 
@@ -37,6 +39,10 @@ public class OrderDataModel {
 
     public double getTotalPrice() {
         return totalPrice;
+    }
+
+    public String getProductName(){
+        return productName;
     }
 
     public String getOrderId() {

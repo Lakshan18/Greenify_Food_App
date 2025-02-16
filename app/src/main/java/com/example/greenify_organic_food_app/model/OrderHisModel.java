@@ -5,19 +5,19 @@ public class OrderHisModel {
     private final int quantity;
     private final double price;
     private final String date;
-    private final int imageResource;
+    private final String imageUrl; // Changed to store Firebase Storage URL
 
-    public OrderHisModel(String title, int quantity, double price, String date, int imageResource) {
+    public OrderHisModel(String title, int quantity, double price, String date, String imageUrl) {
         this.title = title;
         this.quantity = quantity;
         this.price = price;
         this.date = date;
-        this.imageResource = imageResource;
+        this.imageUrl = imageUrl;
     }
 
     public String getTitle() { return title; }
     public int getQuantity() { return quantity; }
     public double getPrice() { return price; }
     public String getDate() { return date; }
-    public int getImageResource() { return imageResource; }
+    public String getImageUrl() { return imageUrl; } // Updated getter
 }

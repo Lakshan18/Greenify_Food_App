@@ -302,7 +302,6 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void updateFirestore(String username, String profileImageUrl) {
-        // Using SharedPreferences to get the email
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
@@ -314,7 +313,6 @@ public class MyProfileFragment extends Fragment {
                         if (task.isSuccessful() && !task.getResult().isEmpty()) {
                             DocumentSnapshot document = task.getResult().getDocuments().get(0);
 
-                            // Update Firestore with new username and profile image URL
                             document.getReference().update("username", username, "profile_img", profileImageUrl)
                                     .addOnCompleteListener(updateTask -> {
                                         if (updateTask.isSuccessful()) {

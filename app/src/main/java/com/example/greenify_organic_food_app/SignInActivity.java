@@ -103,7 +103,7 @@ public class SignInActivity extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 } else {
-                                    CustomToast.showToast(SignInActivity.this, "Incorrect password", false);
+                                    CustomToast.showToast(SignInActivity.this, "Invalid Credentials.!", false);
                                 }
                             }
                         } else {

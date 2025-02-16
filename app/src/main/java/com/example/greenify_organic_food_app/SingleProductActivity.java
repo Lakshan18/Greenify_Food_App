@@ -102,6 +102,7 @@ public class SingleProductActivity extends AppCompatActivity {
 
             Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
 
+            intent.putExtra("productId",product.getProductId());
             intent.putExtra("productName", product.getName());
             intent.putExtra("productImageUrl", product.getImageUrl());
             intent.putExtra("productPrice", totalPrice);

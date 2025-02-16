@@ -158,9 +158,11 @@ public class HomeFragment extends Fragment {
 
     private List<String> getImageList() {
         List<String> imageUrls = new ArrayList<>();
-        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04141642/Free-Stock-Photos-01-2048x1366.jpg");
-        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04150103/Free-Stock-Photos-03-2048x1366.jpg");
-        imageUrls.add("https://static.desygner.com/wp-content/uploads/sites/13/2022/05/04154511/Free-Stock-Photos-06-2048x1366.jpg");
+        imageUrls.add("https://miro.medium.com/v2/resize:fit:740/1*Gnf8_1da3bh6fI7Re1shpQ.jpeg");
+        imageUrls.add("https://restaurantindia.s3.ap-south-1.amazonaws.com/s3fs-public/news15171.jpg");
+        imageUrls.add("https://tinybeans.com/wp-content/uploads/2022/04/creative-kids-lunches.jpg");
+        imageUrls.add("https://www.buffalomarket.com/hubfs/Canva%20images/Natural%20Food.png");
+        imageUrls.add("https://t3.ftcdn.net/jpg/03/32/35/08/360_F_332350888_TGngvcPHa7wXrY1MFFAofZLTyZcIun4D.jpg");
         return imageUrls;
     }
 

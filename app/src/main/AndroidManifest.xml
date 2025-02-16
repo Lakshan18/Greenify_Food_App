@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.greenify_organic_food_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -20,22 +21,6 @@
         <activity
             android:name=".PaymentSuccessActivity"
             android:exported="false" />
-        <activity
-            android:name=".Deliverer_HomeActivity"
-            android:exported="false"
-            android:label="@string/title_activity_deliverer_home"
-            android:theme="@style/Theme.Greenify_Organic_Food_App.NoActionBar" />
-        <activity
-            android:name=".DeliverMainActivity"
-            android:exported="true"
-            android:icon="@mipmap/ic_delivery"
-            android:label="@string/deliver_app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ProductRecipeActivity"
             android:exported="false" />

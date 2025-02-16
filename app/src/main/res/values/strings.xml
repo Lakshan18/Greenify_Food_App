@@ -88,17 +88,4 @@
     <!--    Recipe Section strings....-->
     <string name="pr_recipe_heading_text1">Product Recipe</string>
 
-
-    <!--    Deliverer Screen section strings....-->
-    <string name="del_wel_text1">Welcome back deliverer!</string>
-    <string name="deliverer_usr_text_inp1">Username</string>
-    <string name="deliverer_pass_text_inp2">Password</string>
-    <string name="title_activity_deliverer_home">Deliverer_HomeActivity</string>
-    <string name="del_greenify_del_text1">Greenify Deliverer</string>
-    <string name="del_ong_deliveries_text1">Ongoing Deliveries</string>
-    <string name="del_rec_deliveries_text1">Recent Deliveries</string>
-    <string name="del_cus_feedback_text1">Customer Feedbacks</string>
-
-    <string name="del_ong_del_start_btn">Start Ride</string>
-
 </resources>
