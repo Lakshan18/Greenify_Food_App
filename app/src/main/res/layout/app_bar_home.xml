@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:background="@color/shade_gray"
-        app:popupTheme="@style/Theme.Greenify_Organic_Food_App.PopupOverlay" />
+        app:popupTheme="@style/Theme.Greenify_Organic_Food_App.PopupOverlay"
+        app:titleTextColor="@color/black" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

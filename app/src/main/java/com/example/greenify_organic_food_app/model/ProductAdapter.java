@@ -49,7 +49,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(v -> {
             // Pass the ProductModel to SingleProductActivity
             Intent intent = new Intent(v.getContext(), SingleProductActivity.class);
-            intent.putExtra("p_id",product.getProductId());
+            intent.putExtra("p_id", product.getProductId());
             intent.putExtra("product", product);
             v.getContext().startActivity(intent);
         });
@@ -58,6 +58,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public int getItemCount() {
         return productList.size();
+    }
+
+    // Add this method to update the product list dynamically
+    public void updateProductList(List<ProductModel> newProductList) {
+        productList.clear();
+        productList.addAll(newProductList);
+        notifyDataSetChanged(); // Notify adapter of data changes
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {

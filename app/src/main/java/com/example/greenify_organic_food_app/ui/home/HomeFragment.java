@@ -1,11 +1,14 @@
 package com.example.greenify_organic_food_app.ui.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.R;
+import com.example.greenify_organic_food_app.SearchResultActivity;
 import com.example.greenify_organic_food_app.model.CategoryAdapter;
 import com.example.greenify_organic_food_app.model.CategoryModel;
 import com.example.greenify_organic_food_app.model.ProductAdapter;
@@ -78,7 +82,34 @@ public class HomeFragment extends Fragment {
         productRecyclerView.setAdapter(productAdapter);
         fetchProductsFromFirebase();
 
+        EditText homeSearchField = view.findViewById(R.id.home_searchField1);
+        homeSearchField.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                String query = homeSearchField.getText().toString().trim();
+                if (!query.isEmpty()) {
+                    // Start SearchResultsActivity with the search query
+                    Intent intent = new Intent(getActivity(), SearchResultActivity.class);
+                    intent.putExtra("searchQuery", query);
+                    startActivity(intent);
+                }
+                return true;
+            }
+            return false;
+        });
+
         return view;
+    }
+
+    private void navigateToSearchFragment(String query) {
+        SearchFragment searchFragment = new SearchFragment();
+        Bundle args = new Bundle();
+        args.putString("searchQuery", query);
+        searchFragment.setArguments(args);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment_content_home, searchFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     private void fetchProductsFromFirebase() {

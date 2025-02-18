@@ -74,45 +74,56 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private void checkUserInDb(String email,String enteredPassword){
+    private void checkUserInDb(String email, String enteredPassword) {
+        // Convert email to lowercase for case-insensitive matching
+        String lowercaseEmail = email.toLowerCase();
+
+        Log.d("Sign In Activity:" , lowercaseEmail);
 
         db.collection("customer")
-                .whereEqualTo("email", email)
+                .whereEqualTo("email", lowercaseEmail) // Use lowercase email for query
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null && !querySnapshot.isEmpty()) {
                             for (QueryDocumentSnapshot documentSnapshot : querySnapshot) {
+                                // Log the document data for debugging
+                                Log.d("Firestore Data", documentSnapshot.getData().toString());
+
                                 String dbPassword = documentSnapshot.getString("password");
                                 String dbName = documentSnapshot.getString("name");
                                 String dbMobile = documentSnapshot.getString("mobile");
 
                                 if (enteredPassword.equals(dbPassword)) {
+                                    // Save user data to SharedPreferences
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
                                     editor.putString("customerName", dbName);
                                     editor.putString("customerMobile", dbMobile);
-                                    editor.putString("customerEmail", email);
-
-                                    long currentTime = System.currentTimeMillis();
-                                    editor.putLong("lastLoginTime", currentTime);
-
+                                    editor.putString("customerEmail", lowercaseEmail); // Use lowercase email
+                                    editor.putLong("lastLoginTime", System.currentTimeMillis());
                                     editor.apply();
 
+                                    // Show success message and navigate to HomeActivity
                                     CustomToast.showToast(SignInActivity.this, "Sign In Successfully.!", true);
                                     Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();
                                 } else {
+                                    // Show error for invalid password
                                     CustomToast.showToast(SignInActivity.this, "Invalid Credentials.!", false);
                                 }
                             }
                         } else {
+                            // Show error if email is not registered
                             CustomToast.showToast(SignInActivity.this, "Email not registered", false);
                         }
                     } else {
+                        // Show error if Firestore query fails
                         CustomToast.showToast(SignInActivity.this, "Error fetching data.", false);
+                        Log.e("Firestore Error", "Error fetching data", task.getException());
                     }
                 });
     }
+
 }

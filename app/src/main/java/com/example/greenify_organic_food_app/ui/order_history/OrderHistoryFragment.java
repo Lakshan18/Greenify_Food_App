@@ -62,7 +62,6 @@ public class OrderHistoryFragment extends Fragment {
     }
 
     private void loadOrders(String customerEmail) {
-
         db.collection("order")
                 .whereEqualTo("customer_email", customerEmail)
                 .get()
@@ -71,19 +70,19 @@ public class OrderHistoryFragment extends Fragment {
                         orderList.clear();
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                             String productName = documentSnapshot.getString("product_name");
-                            int purchased_qty = documentSnapshot.getLong("purchased_qty").intValue();
+                            Long purchasedQtyLong = documentSnapshot.getLong("quantity"); // Get as Long
+                            int purchased_qty = purchasedQtyLong != null ? purchasedQtyLong.intValue() : 0; // Handle null case
                             double totalPrice = documentSnapshot.getDouble("total_price");
                             String dateTime = documentSnapshot.getString("date_time");
                             String productImage = documentSnapshot.getString("product_image");
 
                             OrderHisModel order = new OrderHisModel(productName, purchased_qty, totalPrice, dateTime, productImage);
                             orderList.add(order);
-                            ordHisAdapter.notifyDataSetChanged();
                         }
-                    }else {
-                        Log.d("Order Process:","Not Order found.!");
+                        ordHisAdapter.notifyDataSetChanged(); // Notify adapter after all items are added
+                    } else {
+                        Log.d("Order Process:", "No orders found.");
                     }
                 });
-
     }
 }
