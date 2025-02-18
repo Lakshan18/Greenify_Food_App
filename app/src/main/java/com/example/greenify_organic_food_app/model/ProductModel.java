@@ -64,18 +64,6 @@ public class ProductModel implements Serializable {
         return rating;
     }
 
-    public void setRating(String rating) {
-        this.rating = rating;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public String getDescription() {
         return description;
     }

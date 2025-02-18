@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,14 +48,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartModel cartItem = cartItems.get(position);
 
         holder.itemName.setText(cartItem.getProductName());
-        String formattedPrice = String.format("Rs: %.2f", cartItem.getPrice());
-        holder.itemPrice.setText(formattedPrice);
+        holder.itemPrice.setText(String.format("Rs: %.2f", cartItem.getPrice()));
         holder.itemQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
-        Glide.with(context)
-                .load(cartItem.getImage())
-                .into(holder.itemImage);
+        Glide.with(context).load(cartItem.getImage()).into(holder.itemImage);
 
+        // Handle checkbox state
+        holder.checkBoxSelect.setChecked(cartItem.isSelected());
+        holder.checkBoxSelect.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            cartItem.setSelected(isChecked);
+            cartUpdateListener.onCartUpdated();
+        });
+
+        // Increase quantity
         holder.btnIncrease.setOnClickListener(v -> {
             int currentQuantity = cartItem.getQuantity();
             cartItem.setQuantity(currentQuantity + 1);
@@ -62,6 +68,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             cartUpdateListener.onCartUpdated();
         });
 
+        // Decrease quantity
         holder.btnDecrease.setOnClickListener(v -> {
             int currentQuantity = cartItem.getQuantity();
             if (currentQuantity > 1) {
@@ -71,9 +78,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         });
 
-        holder.btnRemove.setOnClickListener(v -> {
-            removeCartItemFromFirestore(cartItem, position);
-        });
+        // Remove item
+        holder.btnRemove.setOnClickListener(v -> removeCartItemFromFirestore(cartItem, position));
     }
 
     private void removeCartItemFromFirestore(CartModel cartItem, int position) {
@@ -128,11 +134,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     }
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
+        CheckBox checkBoxSelect;
         ImageView itemImage, btnIncrease, btnDecrease, btnRemove;
         TextView itemName, itemPrice, itemQuantity;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
+            checkBoxSelect = itemView.findViewById(R.id.checkBoxSelect);
             itemImage = itemView.findViewById(R.id.cartItemImage);
             itemName = itemView.findViewById(R.id.cartItemName);
             itemPrice = itemView.findViewById(R.id.cartItemPrice);

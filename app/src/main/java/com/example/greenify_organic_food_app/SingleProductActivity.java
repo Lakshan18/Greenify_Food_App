@@ -221,18 +221,14 @@ public class SingleProductActivity extends AppCompatActivity {
     }
 
     private void placeOrder() {
-        if (product == null) {
-            Toast.makeText(this, "Product data is not available!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        double totalPrice = product.getPrice() * quantity;
+        if (product == null) return;
 
         Intent intent = new Intent(SingleProductActivity.this, PlaceOrderActivity.class);
         intent.putExtra("productName", product.getName());
         intent.putExtra("productImageUrl", product.getImageUrl());
-        intent.putExtra("productPrice", totalPrice);
+        intent.putExtra("productPrice", product.getPrice() * quantity);
         intent.putExtra("productQuantity", quantity);
+        intent.putExtra("productId", product.getProductId());
         startActivity(intent);
     }
 
@@ -262,8 +258,18 @@ public class SingleProductActivity extends AppCompatActivity {
                         updatePrice();
                         Glide.with(this).load(product.getImageUrl()).into(productImage);
 
+                        if (documentSnapshot.contains("ing_list")) {
+                            List<Integer> ingList = (List<Integer>) documentSnapshot.get("ing_list");
+                            product.setIngList(ingList);
+                        } else {
+                        Log.d("Single Product:", "Ing list field not found in document");
+                        }
+
                         if (product.getIngList() != null) {
                             loadIngredientImages(product.getIngList());
+                        } else {
+                            Log.d("Single Product:", "Ing list is null");
+//
                         }
 
                         Map<String, Long> nutritionMapLong = (Map<String, Long>) documentSnapshot.get("nutrition");
@@ -296,6 +302,8 @@ public class SingleProductActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d("FirestoreDb", "Ingredient IDs: " + ingredientIds.toString());
+
         db.collection("ingredients")
                 .whereIn("ing_id", ingredientIds)
                 .get()
@@ -305,15 +313,22 @@ public class SingleProductActivity extends AppCompatActivity {
                         return;
                     }
 
+                    Log.d("FirestoreDb", "Number of ingredients found: " + queryDocumentSnapshots.size());
+
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         String imageUrl = document.getString("ing_image");
                         if (imageUrl != null) {
                             ingredientImageUrls.add(imageUrl);
+                        } else {
+                            Log.d("FirestoreDb", "No image URL found for ingredient: " + document.getId());
                         }
                     }
 
+                    Log.d("FirestoreDb", "Ingredient Image URLs: " + ingredientImageUrls.toString());
+
                     ingredientsAdapter = new IngredientsAdapter(SingleProductActivity.this, ingredientImageUrls);
                     ingredientRecyclerView.setAdapter(ingredientsAdapter);
+                    ingredientsAdapter.notifyDataSetChanged(); // Notify adapter of data change
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FirestoreDb", "Error fetching ingredients: " + e.getMessage());

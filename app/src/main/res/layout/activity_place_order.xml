@@ -48,6 +48,15 @@
                     android:padding="8dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/order_items_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/card_border"
+                android:padding="8dp"/>
+
             <!-- Product Details Section (Newly Added) -->
             <LinearLayout
                 android:id="@+id/product_details_section"

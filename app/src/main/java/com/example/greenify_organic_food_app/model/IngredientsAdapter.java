@@ -38,6 +38,8 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
         // Load image from URL using Glide
         Glide.with(context)
                 .load(imageUrl)
+                .placeholder(R.drawable.ic_greenify) // Add a placeholder image
+                .error(R.drawable.ic_error) // Add an error image
                 .into(holder.ingredientImage);
     }
 
