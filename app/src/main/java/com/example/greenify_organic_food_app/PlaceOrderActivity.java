@@ -61,12 +61,13 @@ public class PlaceOrderActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
     private static final String TAG = "PayHereDemo";
-    private Map<String,String> addressMap;
+    private OrderDataModel currentOrder;
 
     private RecyclerView orderItemsRecyclerView;
     private OrderItemsAdapter orderItemsAdapter;
     private List<CartModel> selectedItems;
     private boolean isCartOrder = false;
+
     private final ActivityResultLauncher<Intent> payHereLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -77,21 +78,18 @@ public class PlaceOrderActivity extends AppCompatActivity {
 
                         if (serializable instanceof PHResponse) {
                             PHResponse<StatusResponse> response = (PHResponse<StatusResponse>) serializable;
-                            String msg = response.isSuccess() ? "Payment Success" : "Payment Failed.!";
-                            Log.d(TAG, "Payment Response: " + response.toString());
+                            String msg = response.isSuccess() ? "Payment Success" : "Payment Failed!";
                             Log.d(TAG, msg);
                             if ("Payment Success".equals(msg)) {
-                                // Insert order data into Firestore after successful payment
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, true);
-                                orderConfirmed(addressMap.get("address"), addressMap.get("cusEmail"));
+                                orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail());
                             } else {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, false);
                             }
                         }
                     }
                 } else if (result.getResultCode() == Activity.RESULT_CANCELED) {
-                    Log.d(TAG, "Customer canceled the request.");
-                    CustomToast.showToast(PlaceOrderActivity.this, "Customer canceled the request.!", false);
+                    CustomToast.showToast(PlaceOrderActivity.this, "Customer canceled the request!", false);
                 }
             }
     );
@@ -146,7 +144,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         });
 
         orderItemsRecyclerView = findViewById(R.id.order_items_recycler);
-        if(getIntent().hasExtra("selectedItems")) {
+        if (getIntent().hasExtra("selectedItems")) {
             isCartOrder = true;
             selectedItems = getIntent().getParcelableArrayListExtra("selectedItems");
             setupCartOrderView();
@@ -196,6 +194,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
     }
 
     private void loadCheckCustomerAddress(String customerId) {
+
         db.collection("customer")
                 .document(customerId)
                 .collection("customer_address")
@@ -205,28 +204,23 @@ public class PlaceOrderActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            // Address exists, proceed with payment
                             String address = document.getString("address_line1") + document.getString("address_line2");
 
-                            Intent intent = getIntent();
-                            double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-                            String productName = intent.getStringExtra("productName");
                             String email = sharedPreferences.getString("customerEmail", null);
                             String phone = sharedPreferences.getString("customerMobile", null);
                             String name = sharedPreferences.getString("customerName", null);
 
                             String orderId = "ord_N" + System.currentTimeMillis();
+                            String productName = isCartOrder ? "Cart Items" : getIntent().getStringExtra("productName");
+                            double totalAmount = calculateTotalAmount();
 
-                            // Enable the proceed button and set the click listener
                             btnProceed.setEnabled(true);
-                            OrderDataModel orderDataModel1 = new OrderDataModel(name, phone, email, address, productPrice, productName, orderId);
+                            OrderDataModel orderDataModel1 = new OrderDataModel(name, phone, email, address, totalAmount, productName, orderId);
                             btnProceed.setOnClickListener(v -> initiatePayment(orderDataModel1));
                         } else {
-                            // Address does not exist, show the "No Address" dialog
                             showNoAddressDialog();
                         }
                     } else {
-                        // Firestore query failed
                         CustomToast.showToast(PlaceOrderActivity.this, "Failed to fetch address details.", false);
                     }
                 });
@@ -244,8 +238,8 @@ public class PlaceOrderActivity extends AppCompatActivity {
         Button btnClose = dialogView.findViewById(R.id.btn_close);
 
         btnGoToProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class); // Replace with your MainActivity
-            intent.putExtra("fragment", "MyProfileFragment"); // Pass fragment name as extra
+            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+            intent.putExtra("fragment", "MyProfileFragment");
             startActivity(intent);
             dialog.dismiss();
         });
@@ -267,12 +261,10 @@ public class PlaceOrderActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-        String productName = intent.getStringExtra("productName");
-        String email = sharedPreferences.getString("customerEmail", null);
-
+        String productName = isCartOrder ? "Cart Items" : getIntent().getStringExtra("productName");
+        String email = sharedPreferences.getString("customerEmail",null);
+        double totalAmount = calculateTotalAmount();
         String orderId = "ord_N" + System.currentTimeMillis();
-
-        btnProceed.setEnabled(!name.isEmpty() && !address.isEmpty() && !city.isEmpty() && !phone.isEmpty());
 
         OrderDataModel orderDataModel2 = new OrderDataModel(name, phone, email, address, productPrice, productName, orderId);
 
@@ -280,60 +272,73 @@ public class PlaceOrderActivity extends AppCompatActivity {
     }
 
     private void setupSingleProductView() {
-        // Original single product handling
-        Intent intent = getIntent();
-        String productName = intent.getStringExtra("productName");
-        String productImageUrl = intent.getStringExtra("productImageUrl");
-        double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-        int productQuantity = intent.getIntExtra("productQuantity", 1);
 
-        ord_p_name.setText(productName);
-        ord_p_price.setText(String.format("Rs: %.2f", productPrice));
-        ord_p_qty.setText("Quantity:" + productQuantity);
-        Glide.with(this).load(productImageUrl).into(ord_p_img);
+        if (!isCartOrder) {
+            Intent intent = getIntent();
+            String productName = intent.getStringExtra("productName");
+            String productImageUrl = intent.getStringExtra("productImageUrl");
+            double productPrice = intent.getDoubleExtra("productPrice", 0.0);
+            int productQuantity = intent.getIntExtra("productQuantity", 1);
+
+            ord_p_name.setText(productName);
+            ord_p_price.setText(String.format("Rs: %.2f", productPrice));
+            ord_p_qty.setText("Quantity:" + productQuantity);
+            Glide.with(this).load(productImageUrl).into(ord_p_img);
+        }
+
     }
 
     private void setupCartOrderView() {
-        // Hide single product views
         findViewById(R.id.product_details_section).setVisibility(View.GONE);
 
-        // Setup RecyclerView
         orderItemsRecyclerView.setVisibility(View.VISIBLE);
         orderItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         orderItemsAdapter = new OrderItemsAdapter(selectedItems);
         orderItemsRecyclerView.setAdapter(orderItemsAdapter);
 
-        // Calculate total price
         double total = calculateTotalAmount();
         ord_p_price.setText(String.format("Rs: %.2f", total));
     }
 
     private double calculateTotalAmount() {
         double total = 0;
-        if(isCartOrder) {
+        if (isCartOrder) {
             for (CartModel item : selectedItems) {
                 total += item.getPrice() * item.getQuantity();
             }
         } else {
+            // Use productPrice from intent for single product
             total = getIntent().getDoubleExtra("productPrice", 0.0);
         }
         return total;
     }
 
     private void initiatePayment(OrderDataModel orderDataModel) {
+        currentOrder = orderDataModel;
         InitRequest req = new InitRequest();
-        req.setMerchantId("1221485");
+        req.setMerchantId("1221485"); // Replace with your merchant ID
         req.setCurrency("LKR");
         req.setAmount(calculateTotalAmount());
+        req.setOrderId(orderDataModel.getOrderId());
+        req.setItemsDescription(orderDataModel.getProductName());
+        req.setCustom1("Custom 1");
+        req.setCustom2("Custom 2");
 
-        // Build items description
-        StringBuilder itemsDesc = new StringBuilder();
-        List<Item> payhereItems = new ArrayList<>();
+        req.getCustomer().setFirstName(orderDataModel.getCustomerName());
+        req.getCustomer().setLastName("");
+        req.getCustomer().setEmail(orderDataModel.getEmail());
+        req.getCustomer().setPhone(orderDataModel.getMobile());
+        req.getCustomer().getAddress().setAddress(orderDataModel.getAddress());
+        req.getCustomer().getAddress().setCity("");
+        req.getCustomer().getAddress().setCountry("Sri Lanka");
+        req.setNotifyUrl("xxx");
+        req.getCustomer().getDeliveryAddress().setAddress(orderDataModel.getAddress());
+        req.getCustomer().getDeliveryAddress().setCity("");
+        req.getCustomer().getDeliveryAddress().setCountry("Sri Lanka");
 
         if (isCartOrder) {
             for (CartModel item : selectedItems) {
-                itemsDesc.append(item.getProductName()).append(", ");
-                payhereItems.add(new Item(
+                req.getItems().add(new Item(
                         item.getProductId(),
                         item.getProductName(),
                         item.getQuantity(),
@@ -341,8 +346,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
                 ));
             }
         } else {
-            itemsDesc.append(getIntent().getStringExtra("productName"));
-            payhereItems.add(new Item(
+            req.getItems().add(new Item(
                     getIntent().getStringExtra("productId"),
                     getIntent().getStringExtra("productName"),
                     getIntent().getIntExtra("productQuantity", 1),
@@ -350,19 +354,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
             ));
         }
 
-        if (itemsDesc.length() > 0) {
-            itemsDesc.setLength(itemsDesc.length() - 2);
-        }
-
-        req.setOrderId(orderDataModel.getOrderId());
-        req.setItemsDescription(itemsDesc.toString());
-        req.getItems().addAll(payhereItems);
-
-        // Log the request details
-        Log.d(TAG, "Initiate Payment Request: " + req.toString());
-
-        // Rest of payment initialization...
-        Intent intent = new Intent(this, PHMainActivity.class);
+        Intent intent = new Intent(PlaceOrderActivity.this, PHMainActivity.class);
         intent.putExtra(PHConstants.INTENT_EXTRA_DATA, req);
 
         // Enable Sandbox mode
@@ -371,6 +363,12 @@ public class PlaceOrderActivity extends AppCompatActivity {
     }
 
     private void orderConfirmed(String customer_address, String customer_email) {
+
+        if (currentOrder == null) {
+            Log.e(TAG, "Order data is missing!");
+            return;
+        }
+
         String orderId = "ord_N" + System.currentTimeMillis();
         String currentDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
@@ -381,10 +379,9 @@ public class PlaceOrderActivity extends AppCompatActivity {
         orderData.put("order_status", "Pending");
         orderData.put("customer_address", customer_address);
         orderData.put("date_time", currentDateTime);
-        orderData.put("total_amount", calculateTotalAmount());
+        orderData.put("total_price", calculateTotalAmount());
 
-        // Add items subcollection
-        if(isCartOrder) {
+        if (isCartOrder) {
             for (CartModel item : selectedItems) {
                 addOrderItem(orderId, item);
             }
@@ -424,7 +421,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
     }
 
     private void removePurchasedItemsFromCart() {
-        if(!isCartOrder) return;
+        if (!isCartOrder || selectedItems == null || selectedItems.isEmpty()) return;
 
         String customerEmail = sharedPreferences.getString("customerEmail", null);
         db.collection("customer")
