@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +20,28 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.CustomToast;
 import com.example.greenify_organic_food_app.R;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +61,10 @@ public class MyProfileFragment extends Fragment {
     private Uri imageUri;
     private String currentProfileImageUrl;
     private SharedPreferences sharedPreferences;
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
+
+    // LocationIQ API Key
+    private static final String LOCATIONIQ_API_KEY = "pk.7cffa57d7e32ea76bf5813a99f839548";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -90,7 +108,61 @@ public class MyProfileFragment extends Fragment {
 
         btnUpdateDelivery.setOnClickListener(v -> updateDeliveryAddress());
 
+        editAddressLine1.setOnClickListener(v -> {
+            List<Place.Field> fields = Arrays.asList(Place.Field.ADDRESS, Place.Field.LAT_LNG);
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.FULLSCREEN, fields)
+                    .build(requireContext());
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        });
+
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Handle image picker result
+        if (requestCode == PICK_IMAGE_REQUEST) {
+            if (resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
+                imageUri = data.getData();
+                try {
+                    Glide.with(requireContext())
+                            .load(imageUri)
+                            .into(profileImage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        // Handle Places Autocomplete result
+        else if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == getActivity().RESULT_OK && data != null) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                editAddressLine1.setText(place.getAddress());
+                if (place.getLatLng() != null) {
+                    double latitude = place.getLatLng().latitude;
+                    double longitude = place.getLatLng().longitude;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putFloat("latitude", (float) latitude);
+                    editor.putFloat("longitude", (float) longitude);
+                    editor.apply();
+                }
+            }
+            else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                if (data != null) {
+                    Status status = Autocomplete.getStatusFromIntent(data);
+                    Log.e("Places", "Error: " + status.getStatusMessage());
+                }
+            }
+            // Handle user cancellation
+            else if (resultCode == getActivity().RESULT_CANCELED) {
+                // Optional: Show cancellation message
+                Toast.makeText(getContext(), "Address selection cancelled", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void loadCustomerDetails(String email) {
@@ -131,14 +203,14 @@ public class MyProfileFragment extends Fragment {
                 });
     }
 
-    private void loadCustomerDeliveryDetails(String cus_id){
+    private void loadCustomerDeliveryDetails(String cus_id) {
         db.collection("customer")
                 .document(cus_id)
                 .collection("customer_address")
                 .document("delivery_details")
                 .get()
                 .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
+                    if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         String ads_line1 = document.getString("address_line1");
                         String ads_line2 = document.getString("address_line2");
@@ -175,22 +247,6 @@ public class MyProfileFragment extends Fragment {
         intent.setType("image/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData();
-            try {
-                Glide.with(requireContext())
-                        .load(imageUri)
-                        .into(profileImage);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void updateProfile() {
@@ -254,50 +310,81 @@ public class MyProfileFragment extends Fragment {
         String addressLine1 = editAddressLine1.getText().toString().trim();
         String addressLine2 = editAddressLine2.getText().toString().trim();
         String district = districtDropdown.getText().toString().trim();
-        String contactNumber = sharedPreferences.getString("customerMobile",null);
+        String contactNumber = sharedPreferences.getString("customerMobile", null);
 
         if (addressLine1.isEmpty() || district.isEmpty() || contactNumber.isEmpty()) {
-            CustomToast.showToast(getContext(),"Please fill all required fields",false);
+            CustomToast.showToast(getContext(), "Please fill all required fields", false);
             return;
         }
 
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
-        String customerEmail = sharedPreferences.getString("customerEmail", null);
+        // Combine address components into a single query
+        String fullAddress = addressLine1 + ", " + addressLine2 + ", " + district;
 
-        if (customerEmail == null) {
-            CustomToast.showToast(getContext(),"Customer email not found!",false);
+        // Fetch latitude and longitude using LocationIQ
+        fetchLatLongFromAddress(fullAddress, (latitude, longitude) -> {
+            if (latitude != null && longitude != null) {
+                // Save address and coordinates to Firestore
+                saveAddressToFirestore(addressLine1, addressLine2, district, contactNumber, latitude, longitude);
+            } else {
+                CustomToast.showToast(getContext(), "Failed to fetch location. Please check the address.", false);
+            }
+        });
+    }
+
+    private void fetchLatLongFromAddress(String address, GeocodingCallback callback) {
+        String url = "https://us1.locationiq.com/v1/search.php?key=" + LOCATIONIQ_API_KEY + "&q=" + Uri.encode(address) + "&format=json";
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONArray jsonArray = new JSONArray(response);
+                        if (jsonArray.length() > 0) {
+                            JSONObject firstResult = jsonArray.getJSONObject(0);
+                            double latitude = firstResult.getDouble("lat");
+                            double longitude = firstResult.getDouble("lon");
+                            callback.onGeocodingResult(latitude, longitude);
+                        } else {
+                            callback.onGeocodingResult(null, null);
+                        }
+                    } catch (Exception e) {
+                        Log.e("Geocoding", "Error parsing JSON", e);
+                        callback.onGeocodingResult(null, null);
+                    }
+                },
+                error -> {
+                    Log.e("Geocoding", "API error: " + error.getMessage());
+                    callback.onGeocodingResult(null, null);
+                });
+
+        queue.add(request);
+    }
+
+    private void saveAddressToFirestore(String addressLine1, String addressLine2, String district, String contactNumber, double latitude, double longitude) {
+        String customerId = sharedPreferences.getString("customerId", null);
+        if (customerId == null) {
+            CustomToast.showToast(getContext(), "Customer ID not found!", false);
             return;
         }
+
+        Map<String, Object> addressData = new HashMap<>();
+        addressData.put("address_line1", addressLine1);
+        addressData.put("address_line2", addressLine2);
+        addressData.put("district", district);
+        addressData.put("contact_number", contactNumber);
+        addressData.put("latitude", latitude);
+        addressData.put("longitude", longitude);
 
         db.collection("customer")
-                .whereEqualTo("email", customerEmail)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                        String customerId = document.getId();
-
-                        Map<String, Object> deliveryDetails = new HashMap<>();
-                        deliveryDetails.put("address_line1", addressLine1);
-                        deliveryDetails.put("address_line2", addressLine2);
-                        deliveryDetails.put("district", district);
-                        deliveryDetails.put("contact_number", contactNumber);
-
-                        db.collection("customer")
-                                .document(customerId)
-                                .collection("customer_address")
-                                .document("delivery_details")
-                                .set(deliveryDetails)
-                                .addOnCompleteListener(updateTask -> {
-                                    if (updateTask.isSuccessful()) {
-                                        CustomToast.showToast(getContext(),"Delivery address updated successfully!",true);
-                                    } else {
-                                        CustomToast.showToast(getContext(),"Failed to update delivery address",false);
-                                    }
-                                });
-                    } else {
-                       CustomToast.showToast(getContext(),"Customer data not found!",false);
-                    }
+                .document(customerId)
+                .collection("customer_address")
+                .document("delivery_details")
+                .set(addressData)
+                .addOnSuccessListener(aVoid -> {
+                    CustomToast.showToast(getContext(), "Delivery address updated successfully!", true);
+                })
+                .addOnFailureListener(e -> {
+                    CustomToast.showToast(getContext(), "Failed to update address: " + e.getMessage(), false);
                 });
     }
 
@@ -325,5 +412,9 @@ public class MyProfileFragment extends Fragment {
                         }
                     });
         }
+    }
+
+    private interface GeocodingCallback {
+        void onGeocodingResult(Double latitude, Double longitude);
     }
 }

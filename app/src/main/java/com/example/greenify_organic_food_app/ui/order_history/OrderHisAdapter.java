@@ -34,7 +34,7 @@ public class OrderHisAdapter extends RecyclerView.Adapter<OrderHisAdapter.OrderH
         OrderHisModel order = orderList.get(position);
         holder.orderTitle.setText(order.getTitle());
         holder.orderQuantity.setText("X " + order.getQuantity());
-        holder.orderPrice.setText("Rs: " + order.getPrice());
+        holder.orderPrice.setText(String.format("Rs: %.2f" , order.getPrice()));
         holder.orderDate.setText(order.getDate());
 
         Glide.with(holder.itemView.getContext())

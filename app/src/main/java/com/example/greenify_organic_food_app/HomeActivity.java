@@ -1,10 +1,12 @@
 package com.example.greenify_organic_food_app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,6 +60,22 @@ public class HomeActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.home, menu);
+
+        // Find the sign-out menu item and set its click listener
+        MenuItem signOutItem = menu.findItem(R.id.sign_out_btn);
+        signOutItem.setOnMenuItemClickListener(item -> {
+            Intent intent = new Intent(HomeActivity.this, SignOutActivity.class);
+            startActivity(intent);
+            return true;
+        });
+
+        return true;
     }
 
     private void fetchCustomerDetails(NavigationView navigationView) {
@@ -138,13 +156,6 @@ public class HomeActivity extends AppCompatActivity {
                     // If the image doesn't exist, use a default placeholder
                     imageView.setImageResource(R.drawable.user);
                 });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
     }
 
     @Override

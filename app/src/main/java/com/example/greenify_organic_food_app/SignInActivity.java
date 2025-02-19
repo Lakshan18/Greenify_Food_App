@@ -94,11 +94,13 @@ public class SignInActivity extends AppCompatActivity {
                                 String dbPassword = documentSnapshot.getString("password");
                                 String dbName = documentSnapshot.getString("name");
                                 String dbMobile = documentSnapshot.getString("mobile");
+                                String dbCusId = documentSnapshot.getId();
 
                                 if (enteredPassword.equals(dbPassword)) {
                                     // Save user data to SharedPreferences
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
                                     editor.putString("customerName", dbName);
+                                    editor.putString("customerId",dbCusId);
                                     editor.putString("customerMobile", dbMobile);
                                     editor.putString("customerEmail", lowercaseEmail); // Use lowercase email
                                     editor.putLong("lastLoginTime", System.currentTimeMillis());

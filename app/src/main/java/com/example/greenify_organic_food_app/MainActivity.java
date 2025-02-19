@@ -13,8 +13,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.greenify_organic_food_app.ui.my_profile.MyProfileFragment;
-
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
@@ -30,24 +28,15 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-//        Intent intent = getIntent();
-//        if (intent != null && intent.hasExtra("fragment")) {
-//            String fragmentName = intent.getStringExtra("fragment");
-//            if ("MyProfileFragment".equals(fragmentName)) {
-//                // Navigate to MyProfileFragment
-//                getSupportFragmentManager().beginTransaction()
-//                        .replace(, new MyProfileFragment())
-//                        .commit();
-//            }
-//        }
-
         sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 
         long lastLoginTime = sharedPreferences.getLong("lastLoginTime", -1);
+        String option = sharedPreferences.getString("signOutCustomer","signOut");
 
-        if (lastLoginTime == -1) {
+        if (lastLoginTime == -1 && !"signOut".equals(option)) {
+            // User is not logged in, show the "Get Started" button
             Button button = findViewById(R.id.started_btn);
-            button.setVisibility(View.VISIBLE);  // Show the "Get Started" button
+            button.setVisibility(View.VISIBLE);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -57,14 +46,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
+            // User is logged in, check if the session is still valid
             long currentTime = System.currentTimeMillis();
             long timeDifference = currentTime - lastLoginTime;
 
             if (timeDifference > 48 * 60 * 60 * 1000) {  // 48 hours in milliseconds
+                // Session expired, redirect to SignInActivity
                 Intent intent1 = new Intent(MainActivity.this, SignInActivity.class);
                 startActivity(intent1);
                 finish();
             } else {
+                // Session is valid, redirect to HomeActivity
                 Intent intent2 = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(intent2);
                 finish();

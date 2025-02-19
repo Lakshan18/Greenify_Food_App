@@ -68,20 +68,39 @@ public class OrderHistoryFragment extends Fragment {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         orderList.clear();
-                        for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
-                            String productName = documentSnapshot.getString("product_name");
-                            Long purchasedQtyLong = documentSnapshot.getLong("quantity"); // Get as Long
-                            int purchased_qty = purchasedQtyLong != null ? purchasedQtyLong.intValue() : 0; // Handle null case
-                            double totalPrice = documentSnapshot.getDouble("total_price");
-                            String dateTime = documentSnapshot.getString("date_time");
-                            String productImage = documentSnapshot.getString("product_image");
+                        for (DocumentSnapshot orderDocument : task.getResult()) {
+                            // Get order-level fields
+                            String dateTime = orderDocument.getString("date_time");
+                            double totalPrice = orderDocument.getDouble("total_price");
+                            String orderStatus = orderDocument.getString("order_status");
 
-                            OrderHisModel order = new OrderHisModel(productName, purchased_qty, totalPrice, dateTime, productImage);
-                            orderList.add(order);
+                            // Fetch items subcollection for this order
+                            orderDocument.getReference().collection("items")
+                                    .get()
+                                    .addOnCompleteListener(itemsTask -> {
+                                        if (itemsTask.isSuccessful()) {
+                                            for (DocumentSnapshot itemDocument : itemsTask.getResult()) {
+                                                String productName = itemDocument.getString("product_name");
+                                                Long quantityLong = itemDocument.getLong("quantity");
+                                                int quantity = quantityLong != null ? quantityLong.intValue() : 0;
+                                                String imageUrl = itemDocument.getString("image_url");
+                                                double unitPrice = itemDocument.getDouble("unit_price");
+
+                                                // Create OrderHisModel with item data + order metadata
+                                                OrderHisModel orderItem = new OrderHisModel(
+                                                        productName,
+                                                        quantity,
+                                                        unitPrice * quantity,
+                                                        dateTime,
+                                                        imageUrl);
+                                                orderList.add(orderItem);
+                                            }
+                                            ordHisAdapter.notifyDataSetChanged();
+                                        }
+                                    });
                         }
-                        ordHisAdapter.notifyDataSetChanged(); // Notify adapter after all items are added
                     } else {
-                        Log.d("Order Process:", "No orders found.");
+                        Log.d("OrderHistory", "Error getting orders: ", task.getException());
                     }
                 });
     }
