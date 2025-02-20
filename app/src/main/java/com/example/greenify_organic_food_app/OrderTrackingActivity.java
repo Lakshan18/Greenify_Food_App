@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -23,7 +24,8 @@ public class OrderTrackingActivity extends AppCompatActivity {
     private TextView orderStatus, prepTime, deliveryTime, delivererEta;
     private Button viewMapBtn, confirmDeliveryBtn;
     private ProgressBar progressBar;
-    private LinearLayout delivererTrackingCard, deliveryConfirmationCard, loadingState;
+    private LinearLayout loadingState;
+    private MaterialCardView delivererTrackingCard, deliveryConfirmationCard;
     private FirebaseFirestore db;
     private String orderId, delivererId;
     private ListenerRegistration orderListener, delivererListener;
@@ -115,16 +117,26 @@ public class OrderTrackingActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 delivererTrackingCard.setVisibility(View.GONE);
                 deliveryConfirmationCard.setVisibility(View.GONE);
+                confirmDeliveryBtn.setVisibility(View.GONE); // Hide confirm button
                 break;
             case "Out for Delivery":
                 progressBar.setVisibility(View.GONE);
                 delivererTrackingCard.setVisibility(View.VISIBLE);
                 deliveryConfirmationCard.setVisibility(View.GONE);
+                confirmDeliveryBtn.setVisibility(View.VISIBLE); // Show confirm button
                 break;
             case "Delivered":
                 progressBar.setVisibility(View.GONE);
                 delivererTrackingCard.setVisibility(View.GONE);
                 deliveryConfirmationCard.setVisibility(View.VISIBLE);
+                confirmDeliveryBtn.setVisibility(View.VISIBLE); // Show confirm button
+                break;
+            case "Completed":
+                progressBar.setVisibility(View.GONE);
+                delivererTrackingCard.setVisibility(View.GONE);
+                deliveryConfirmationCard.setVisibility(View.VISIBLE);
+                confirmDeliveryBtn.setVisibility(View.GONE); // Hide confirm button
+                Toast.makeText(this, "Order completed successfully!", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
