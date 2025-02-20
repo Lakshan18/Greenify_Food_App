@@ -82,6 +82,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
                             Log.d(TAG, msg);
                             if ("Payment Success".equals(msg)) {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, true);
+                                savePaymentDetailsToFirestore(currentOrder, response.getData());
                                 orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail());
                             } else {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, false);
@@ -422,6 +423,29 @@ public class PlaceOrderActivity extends AppCompatActivity {
                 .document(orderId)
                 .collection("items")
                 .add(itemData);
+    }
+
+    private void savePaymentDetailsToFirestore(OrderDataModel order, StatusResponse paymentResponse) {
+        if (order == null || paymentResponse == null) {
+            Log.e(TAG, "Order or Payment Response is null!");
+            return;
+        }
+
+        Map<String, Object> paymentData = new HashMap<>();
+        paymentData.put("order_id", order.getOrderId());
+        paymentData.put("customer_name", order.getCustomerName());
+        paymentData.put("customer_email", order.getEmail());
+        paymentData.put("customer_mobile", order.getMobile());
+        paymentData.put("amount", order.getTotalPrice());
+        paymentData.put("payment_status", paymentResponse.getMessage());
+        paymentData.put("transaction_id", paymentResponse.getPaymentNo());
+        paymentData.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+
+        db.collection("payments")
+                .document(order.getOrderId())
+                .set(paymentData)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Payment details saved successfully"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error saving payment details", e));
     }
 
     private void removePurchasedItemsFromCart() {
