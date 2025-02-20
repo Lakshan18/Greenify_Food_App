@@ -402,6 +402,10 @@ public class PlaceOrderActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     removePurchasedItemsFromCart();
                     Log.d(TAG, "Order completed!");
+                    Intent trackingIntent = new Intent(PlaceOrderActivity.this, OrderTrackingActivity.class);
+                    trackingIntent.putExtra("orderId", orderId);
+                    startActivity(trackingIntent);
+                    finish();
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "Order failed: " + e.getMessage()));
     }
