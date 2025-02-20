@@ -18,6 +18,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 public class OrderTrackingActivity extends AppCompatActivity {
@@ -165,7 +168,7 @@ public class OrderTrackingActivity extends AppCompatActivity {
 
     private void confirmDelivery() {
         db.collection("order").document(orderId)
-                .update("order_status", "Delivered")
+                .update("order_status", "Delivered","delivered_time",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()))
                 .addOnSuccessListener(aVoid -> {
                     confirmDeliveryBtn.setEnabled(false);
                     Toast.makeText(this, "Delivery confirmed!", Toast.LENGTH_SHORT).show();
