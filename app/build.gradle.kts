@@ -62,5 +62,6 @@ dependencies {
     implementation("com.github.PayHereDevs:payhere-android-sdk:v3.0.17")
     implementation("com.google.android.libraries.places:places:3.3.0")
     implementation ("com.google.android.gms:play-services-maps:17.0.1")
+    implementation ("com.itextpdf:itext7-core:7.2.3")
 
 }

@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.greenify_organic_food_app.model.CartModel;
 import com.example.greenify_organic_food_app.model.OrderDataModel;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -52,12 +53,12 @@ import lk.payhere.androidsdk.model.StatusResponse;
 
 public class PlaceOrderActivity extends AppCompatActivity {
 
-    private CheckBox existingAddressCheckbox;
+    private CheckBox existingAddressCheckbox, cashOnDeliveryCheckbox;
     private LinearLayout addressInputContainer;
     private Button btnProceed;
     private ImageView backToSingleProduct, ord_p_img;
     private EditText editName, editAddress, editCity, editPhone;
-    private TextView ord_p_name, ord_p_price, ord_p_qty;
+    private TextView ord_p_name, ord_p_price, ord_p_qty, ord_discount, ord_total_price;
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
     private static final String TAG = "PayHereDemo";
@@ -67,6 +68,8 @@ public class PlaceOrderActivity extends AppCompatActivity {
     private OrderItemsAdapter orderItemsAdapter;
     private List<CartModel> selectedItems;
     private boolean isCartOrder = false;
+
+    private double discount = 0.0;
 
     private final ActivityResultLauncher<Intent> payHereLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -82,8 +85,8 @@ public class PlaceOrderActivity extends AppCompatActivity {
                             Log.d(TAG, msg);
                             if ("Payment Success".equals(msg)) {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, true);
-                                savePaymentDetailsToFirestore(currentOrder, response.getData());
-                                orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail());
+                                savePaymentDetailsToFirestore(currentOrder, response.getData(), discount);
+                                orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), discount);
                             } else {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, false);
                             }
@@ -104,6 +107,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 
         existingAddressCheckbox = findViewById(R.id.existing_address_checkbox);
+        cashOnDeliveryCheckbox = findViewById(R.id.cash_on_delivery_checkbox);
         addressInputContainer = findViewById(R.id.address_input_container);
         btnProceed = findViewById(R.id.btn_proceed);
         editName = findViewById(R.id.edit_name);
@@ -115,36 +119,22 @@ public class PlaceOrderActivity extends AppCompatActivity {
         ord_p_name = findViewById(R.id.order_product_name);
         ord_p_price = findViewById(R.id.order_total_price);
         ord_p_qty = findViewById(R.id.order_selected_quantity);
+        ord_discount = findViewById(R.id.order_discount);
+        ord_total_price = findViewById(R.id.order_total_price_with_discount);
+        orderItemsRecyclerView = findViewById(R.id.order_items_recycler);
 
-        Intent intent = getIntent();
-        String productName = intent.getStringExtra("productName");
-        String productImageUrl = intent.getStringExtra("productImageUrl");
-        double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-        int productQuantity = intent.getIntExtra("productQuantity", 1);
-
-        ord_p_name.setText(productName);
-        ord_p_price.setText(String.format("Rs: %.2f", productPrice));
-        ord_p_qty.setText("Quantity:" + productQuantity);
-        Glide.with(this).load(productImageUrl).into(ord_p_img);
+        handleIntentData();
 
         btnProceed.setVisibility(View.VISIBLE);
         btnProceed.setEnabled(false);
 
-        backToSingleProduct.setOnClickListener(v -> {
-            Intent intent2 = new Intent(PlaceOrderActivity.this, HomeActivity.class);
-            startActivity(intent2);
-        });
+        setupClickListeners();
+        setupRecyclerView();
+        setupTextWatchers();
+    }
 
-        existingAddressCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                checkCustomer();
-            } else {
-                addressInputContainer.setVisibility(View.VISIBLE);
-                checkFieldsForEmptyValues();
-            }
-        });
-
-        orderItemsRecyclerView = findViewById(R.id.order_items_recycler);
+    private void handleIntentData() {
+        Intent intent = getIntent();
         if (getIntent().hasExtra("selectedItems")) {
             isCartOrder = true;
             selectedItems = getIntent().getParcelableArrayListExtra("selectedItems");
@@ -152,7 +142,111 @@ public class PlaceOrderActivity extends AppCompatActivity {
         } else {
             setupSingleProductView();
         }
+    }
 
+    private void setupSingleProductView() {
+        if (!isCartOrder) {
+            Intent intent = getIntent();
+            String productName = intent.getStringExtra("productName");
+            String productImageUrl = intent.getStringExtra("productImageUrl");
+            double productPrice = intent.getDoubleExtra("productPrice", 0.0);
+            int productQuantity = intent.getIntExtra("productQuantity", 1);
+
+            ord_p_name.setText(productName);
+            ord_p_price.setText(String.format("Rs: %.2f", productPrice));
+            ord_p_qty.setText("Quantity:" + productQuantity);
+            Glide.with(this).load(productImageUrl).into(ord_p_img);
+
+            if (productQuantity >= 3) {
+                ord_p_price.setTextColor(getResources().getColor(R.color.red));
+            } else {
+                ord_p_price.setTextColor(getResources().getColor(R.color.price_color));
+            }
+
+            if (productQuantity >= 3) {
+                discount = productPrice * 0.05;
+                double discountedTotal = productPrice - discount;
+
+                ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", discount));
+                ord_total_price.setText(String.format("Total: Rs: %.2f", discountedTotal));
+            } else {
+                discount = 0.0;
+                ord_discount.setText("");
+                ord_total_price.setText(String.format("Total: Rs: %.2f", productPrice));
+            }
+        }
+    }
+
+    private void setupCartOrderView() {
+        findViewById(R.id.product_details_section).setVisibility(View.GONE);
+
+        orderItemsRecyclerView.setVisibility(View.VISIBLE);
+        orderItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        orderItemsAdapter = new OrderItemsAdapter(selectedItems);
+        orderItemsRecyclerView.setAdapter(orderItemsAdapter);
+
+        double total = calculateTotalAmount();
+        ord_p_price.setText(String.format("Rs: %.2f", total));
+
+        if (isCartOrder && selectedItems.size() >= 3) {
+            ord_p_price.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            ord_p_price.setTextColor(getResources().getColor(R.color.price_color));
+        }
+
+        if (isCartOrder && selectedItems.size() >= 3) {
+            discount = total * 0.05;
+            double discountedTotal = total - discount;
+
+            ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", discount));
+            ord_total_price.setText(String.format("Total: Rs: %.2f", discountedTotal));
+        } else {
+            discount = 0.0;
+            ord_discount.setText("");
+            ord_total_price.setText(String.format("Total: Rs: %.2f", total));
+        }
+    }
+
+    private double calculateTotalAmount() {
+        double total = 0;
+        if (isCartOrder) {
+            for (CartModel item : selectedItems) {
+                total += item.getPrice() * item.getQuantity();
+            }
+        } else {
+            total = getIntent().getDoubleExtra("productPrice", 0.0);
+        }
+        return total;
+    }
+
+    private void setupClickListeners() {
+        backToSingleProduct.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+        });
+
+        existingAddressCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                btnProceed.setEnabled(false);
+                checkCustomer();
+            } else {
+                addressInputContainer.setVisibility(View.VISIBLE);
+                checkFieldsForEmptyValues();
+            }
+        });
+
+        cashOnDeliveryCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            checkFieldsForEmptyValues();
+        });
+    }
+
+    private void setupRecyclerView() {
+        orderItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        orderItemsAdapter = new OrderItemsAdapter(selectedItems != null ? selectedItems : new ArrayList<>());
+        orderItemsRecyclerView.setAdapter(orderItemsAdapter);
+    }
+
+    private void setupTextWatchers() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -195,7 +289,6 @@ public class PlaceOrderActivity extends AppCompatActivity {
     }
 
     private void loadCheckCustomerAddress(String customerId) {
-
         db.collection("customer")
                 .document(customerId)
                 .collection("customer_address")
@@ -206,7 +299,6 @@ public class PlaceOrderActivity extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             String address = document.getString("address_line1") + document.getString("address_line2");
-
                             String email = sharedPreferences.getString("customerEmail", null);
                             String phone = sharedPreferences.getString("customerMobile", null);
                             String name = sharedPreferences.getString("customerName", null);
@@ -216,8 +308,16 @@ public class PlaceOrderActivity extends AppCompatActivity {
                             double totalAmount = calculateTotalAmount();
 
                             btnProceed.setEnabled(true);
+
                             OrderDataModel orderDataModel1 = new OrderDataModel(name, phone, email, address, totalAmount, productName, orderId);
-                            btnProceed.setOnClickListener(v -> initiatePayment(orderDataModel1));
+
+                            btnProceed.setOnClickListener(v -> {
+                                if (cashOnDeliveryCheckbox.isChecked()) {
+                                    handleCashOnDelivery(orderDataModel1);
+                                } else {
+                                    initiatePayment(orderDataModel1);
+                                }
+                            });
                         } else {
                             showNoAddressDialog();
                         }
@@ -260,64 +360,21 @@ public class PlaceOrderActivity extends AppCompatActivity {
         String city = editCity.getText().toString().trim();
         String phone = editPhone.getText().toString().trim();
 
-        Intent intent = getIntent();
-        double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-        String productName = isCartOrder ? "Cart Items" : getIntent().getStringExtra("productName");
-        String email = sharedPreferences.getString("customerEmail",null);
-        double totalAmount = calculateTotalAmount();
-        String orderId = "ord_N" + System.currentTimeMillis();
-
-        OrderDataModel orderDataModel2 = new OrderDataModel(name, phone, email, address, productPrice, productName, orderId);
-
-        btnProceed.setOnClickListener(v -> initiatePayment(orderDataModel2));
-    }
-
-    private void setupSingleProductView() {
-
-        if (!isCartOrder) {
-            Intent intent = getIntent();
-            String productName = intent.getStringExtra("productName");
-            String productImageUrl = intent.getStringExtra("productImageUrl");
-            double productPrice = intent.getDoubleExtra("productPrice", 0.0);
-            int productQuantity = intent.getIntExtra("productQuantity", 1);
-
-            ord_p_name.setText(productName);
-            ord_p_price.setText(String.format("Rs: %.2f", productPrice));
-            ord_p_qty.setText("Quantity:" + productQuantity);
-            Glide.with(this).load(productImageUrl).into(ord_p_img);
-        }
-
-    }
-
-    private void setupCartOrderView() {
-        findViewById(R.id.product_details_section).setVisibility(View.GONE);
-
-        orderItemsRecyclerView.setVisibility(View.VISIBLE);
-        orderItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        orderItemsAdapter = new OrderItemsAdapter(selectedItems);
-        orderItemsRecyclerView.setAdapter(orderItemsAdapter);
-
-        double total = calculateTotalAmount();
-        ord_p_price.setText(String.format("Rs: %.2f", total));
-    }
-
-    private double calculateTotalAmount() {
-        double total = 0;
-        if (isCartOrder) {
-            for (CartModel item : selectedItems) {
-                total += item.getPrice() * item.getQuantity();
-            }
+        if (existingAddressCheckbox.isChecked()) {
+            btnProceed.setEnabled(cashOnDeliveryCheckbox.isChecked());
         } else {
-            // Use productPrice from intent for single product
-            total = getIntent().getDoubleExtra("productPrice", 0.0);
+            if (name.isEmpty() || address.isEmpty() || city.isEmpty() || phone.isEmpty()) {
+                btnProceed.setEnabled(false);
+            } else {
+                btnProceed.setEnabled(cashOnDeliveryCheckbox.isChecked());
+            }
         }
-        return total;
     }
 
     private void initiatePayment(OrderDataModel orderDataModel) {
         currentOrder = orderDataModel;
         InitRequest req = new InitRequest();
-        req.setMerchantId("1221485"); // Replace with your merchant ID
+        req.setMerchantId("1221485");
         req.setCurrency("LKR");
         req.setAmount(calculateTotalAmount());
         req.setOrderId(orderDataModel.getOrderId());
@@ -358,20 +415,29 @@ public class PlaceOrderActivity extends AppCompatActivity {
         Intent intent = new Intent(PlaceOrderActivity.this, PHMainActivity.class);
         intent.putExtra(PHConstants.INTENT_EXTRA_DATA, req);
 
-        // Enable Sandbox mode
         PHConfigs.setBaseUrl(PHConfigs.SANDBOX_URL);
         payHereLauncher.launch(intent);
     }
 
-    private void orderConfirmed(String customer_address, String customer_email) {
+    private void handleCashOnDelivery(OrderDataModel orderDataModel) {
+        currentOrder = orderDataModel;
+        savePaymentDetailsToFirestore(
+                currentOrder,
+                "Cash on Delivery",
+                "Pending",
+                "CASH-" + currentOrder.getOrderId(),
+                discount
+        );
+        orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), discount);
+    }
 
+    private void orderConfirmed(String customer_address, String customer_email, double discount) {
         if (currentOrder == null) {
             Log.e(TAG, "Order data is missing!");
             return;
         }
 
         String orderId = "ord_N" + System.currentTimeMillis();
-        String currentDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         Map<String, Object> orderData = new HashMap<>();
         orderData.put("order_id", orderId);
@@ -379,8 +445,9 @@ public class PlaceOrderActivity extends AppCompatActivity {
         orderData.put("deliverer_status", "Unassigned");
         orderData.put("order_status", "Pending");
         orderData.put("customer_address", customer_address);
-        orderData.put("date_time", currentDateTime);
+        orderData.put("date_time", Timestamp.now());
         orderData.put("total_price", calculateTotalAmount());
+        orderData.put("discount", discount);
 
         if (isCartOrder) {
             for (CartModel item : selectedItems) {
@@ -416,7 +483,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         itemData.put("product_id", item.getProductId());
         itemData.put("product_name", item.getProductName());
         itemData.put("quantity", item.getQuantity());
-        itemData.put("unit_price", item.getPrice());
+        itemData.put("unit_price", item.getPrice() / item.getQuantity());
         itemData.put("image_url", item.getImage());
 
         db.collection("order")
@@ -425,7 +492,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
                 .add(itemData);
     }
 
-    private void savePaymentDetailsToFirestore(OrderDataModel order, StatusResponse paymentResponse) {
+    private void savePaymentDetailsToFirestore(OrderDataModel order, StatusResponse paymentResponse, double discount) {
         if (order == null || paymentResponse == null) {
             Log.e(TAG, "Order or Payment Response is null!");
             return;
@@ -437,15 +504,42 @@ public class PlaceOrderActivity extends AppCompatActivity {
         paymentData.put("customer_email", order.getEmail());
         paymentData.put("customer_mobile", order.getMobile());
         paymentData.put("amount", order.getTotalPrice());
+        paymentData.put("payment_method", "PayHere");
         paymentData.put("payment_status", paymentResponse.getMessage());
         paymentData.put("transaction_id", paymentResponse.getPaymentNo());
-        paymentData.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+        paymentData.put("discount", discount);
+        paymentData.put("timestamp", Timestamp.now());
 
         db.collection("payments")
                 .document(order.getOrderId())
                 .set(paymentData)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Payment details saved successfully"))
                 .addOnFailureListener(e -> Log.e(TAG, "Error saving payment details", e));
+    }
+
+    private void savePaymentDetailsToFirestore(OrderDataModel order, String paymentMethod, String paymentStatus, String transactionId, double discount) {
+        if (order == null) {
+            Log.e(TAG, "Order data is missing!");
+            return;
+        }
+
+        Map<String, Object> paymentData = new HashMap<>();
+        paymentData.put("order_id", order.getOrderId());
+        paymentData.put("customer_name", order.getCustomerName());
+        paymentData.put("customer_email", order.getEmail());
+        paymentData.put("customer_mobile", order.getMobile());
+        paymentData.put("amount", order.getTotalPrice());
+        paymentData.put("payment_method", paymentMethod);
+        paymentData.put("payment_status", paymentStatus);
+        paymentData.put("transaction_id", transactionId);
+        paymentData.put("discount", discount);
+        paymentData.put("timestamp", Timestamp.now());
+
+        db.collection("payments")
+                .document(order.getOrderId())
+                .set(paymentData)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Cash on Delivery payment saved"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error saving Cash on Delivery", e));
     }
 
     private void removePurchasedItemsFromCart() {

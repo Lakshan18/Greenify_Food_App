@@ -1,6 +1,5 @@
 package com.example.greenify_organic_food_app.ui.order_history;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,12 +19,13 @@ import com.example.greenify_organic_food_app.model.OrderHisModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class OrderHistoryFragment extends Fragment {
 
@@ -47,14 +47,14 @@ public class OrderHistoryFragment extends Fragment {
 
         if (customerEmail == null) {
             CustomToast.showToast(getContext(), "Please log in to view orders.", false);
-            return view; // Exit early
+            return view;
         }
 
         RecyclerView orderRecyclerView = view.findViewById(R.id.orderRecyclerView);
         orderRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         orderList = new ArrayList<>();
-        ordHisAdapter = new OrderHisAdapter(orderList);
+        ordHisAdapter = new OrderHisAdapter(orderList,getContext());
         orderRecyclerView.setAdapter(ordHisAdapter);
 
         loadOrders(customerEmail);
@@ -64,17 +64,20 @@ public class OrderHistoryFragment extends Fragment {
     private void loadOrders(String customerEmail) {
         db.collection("order")
                 .whereEqualTo("customer_email", customerEmail)
+                .orderBy("date_time", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         orderList.clear();
+                        List<OrderHisModel> tempOrderList = new ArrayList<>();
+
                         for (DocumentSnapshot orderDocument : task.getResult()) {
-                            // Get order-level fields
-                            String dateTime = orderDocument.getString("date_time");
+                            com.google.firebase.Timestamp timestamp = orderDocument.getTimestamp("date_time");
+                            String dateTime = formatTimestamp(timestamp);
+                            String orderId = orderDocument.getId();
                             double totalPrice = orderDocument.getDouble("total_price");
                             String orderStatus = orderDocument.getString("order_status");
 
-                            // Fetch items subcollection for this order
                             orderDocument.getReference().collection("items")
                                     .get()
                                     .addOnCompleteListener(itemsTask -> {
@@ -86,15 +89,21 @@ public class OrderHistoryFragment extends Fragment {
                                                 String imageUrl = itemDocument.getString("image_url");
                                                 double unitPrice = itemDocument.getDouble("unit_price");
 
-                                                // Create OrderHisModel with item data + order metadata
                                                 OrderHisModel orderItem = new OrderHisModel(
+                                                        orderId,
                                                         productName,
                                                         quantity,
                                                         unitPrice * quantity,
+                                                        orderStatus,
                                                         dateTime,
                                                         imageUrl);
-                                                orderList.add(orderItem);
+                                                tempOrderList.add(orderItem);
                                             }
+
+                                            tempOrderList.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+
+                                            orderList.clear();
+                                            orderList.addAll(tempOrderList);
                                             ordHisAdapter.notifyDataSetChanged();
                                         }
                                     });
@@ -103,5 +112,14 @@ public class OrderHistoryFragment extends Fragment {
                         Log.d("OrderHistory", "Error getting orders: ", task.getException());
                     }
                 });
+    }
+
+    private String formatTimestamp(com.google.firebase.Timestamp timestamp) {
+        if (timestamp == null) {
+            return "No date available";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = timestamp.toDate();
+        return sdf.format(date);
     }
 }
