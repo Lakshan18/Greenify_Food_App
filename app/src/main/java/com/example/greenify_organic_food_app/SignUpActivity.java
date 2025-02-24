@@ -85,7 +85,7 @@ public class SignUpActivity extends AppCompatActivity {
                     .add(customer)
                     .addOnSuccessListener(documentReference -> {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean("isFirstTimeUser", false); // Mark as not first time user
+                        editor.putBoolean("isFirstTimeUser", false);
                         editor.apply();
 
                         CustomToast.showToast(SignUpActivity.this, "Registration Successful!", true);

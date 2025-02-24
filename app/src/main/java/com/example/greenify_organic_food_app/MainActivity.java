@@ -32,9 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
         long lastLoginTime = sharedPreferences.getLong("lastLoginTime", -1);
         String option = sharedPreferences.getString("signOutCustomer","signOut");
+        boolean isFirstTimeUser = sharedPreferences.getBoolean("isFirstTimeUser", true);
 
-        if (lastLoginTime == -1 && !"signOut".equals(option)) {
-            // User is not logged in, show the "Get Started" button
+        if (isFirstTimeUser) {
+            // New user, show the "Get Started" button
             Button button = findViewById(R.id.started_btn);
             button.setVisibility(View.VISIBLE);
             button.setOnClickListener(new View.OnClickListener() {
@@ -45,22 +46,34 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
             });
-        } else {
-            // User is logged in, check if the session is still valid
-            long currentTime = System.currentTimeMillis();
-            long timeDifference = currentTime - lastLoginTime;
+        }else{
 
-            if (timeDifference > 48 * 60 * 60 * 1000) {  // 48 hours in milliseconds
-                // Session expired, redirect to SignInActivity
-                Intent intent1 = new Intent(MainActivity.this, SignInActivity.class);
-                startActivity(intent1);
-                finish();
+            if (lastLoginTime == -1 && !"signOut".equals(option)) {
+                Button button = findViewById(R.id.started_btn);
+                button.setVisibility(View.VISIBLE);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
             } else {
-                // Session is valid, redirect to HomeActivity
-                Intent intent2 = new Intent(MainActivity.this, HomeActivity.class);
-                startActivity(intent2);
-                finish();
+                long currentTime = System.currentTimeMillis();
+                long timeDifference = currentTime - lastLoginTime;
+
+                if (timeDifference > 48 * 60 * 60 * 1000) {
+                    Intent intent1 = new Intent(MainActivity.this, SignInActivity.class);
+                    startActivity(intent1);
+                    finish();
+                } else {
+                    Intent intent2 = new Intent(MainActivity.this, HomeActivity.class);
+                    startActivity(intent2);
+                    finish();
+                }
             }
+
         }
     }
 }

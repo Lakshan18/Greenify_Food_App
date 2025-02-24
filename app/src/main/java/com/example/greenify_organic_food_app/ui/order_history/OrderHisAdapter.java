@@ -49,7 +49,7 @@ public class OrderHisAdapter extends RecyclerView.Adapter<OrderHisAdapter.OrderH
         int color;
         switch (order.getOrder_status()) {
             case "Pending":
-                color = Color.YELLOW;
+                color = Color.MAGENTA;
                 break;
             case "Preparing":
                 color = Color.parseColor("#FFA500");
