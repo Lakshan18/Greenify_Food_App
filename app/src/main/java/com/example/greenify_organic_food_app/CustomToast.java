@@ -20,9 +20,9 @@ public class CustomToast {
 
         toastText.setText(message);
         if (isSuccess) {
-            toastIcon.setImageResource(R.drawable.ic_success); // Success icon
+            toastIcon.setImageResource(R.drawable.ic_success);
         } else {
-            toastIcon.setImageResource(R.drawable.ic_error); // Error icon
+            toastIcon.setImageResource(R.drawable.ic_error);
         }
 
         Toast toast = new Toast(context);

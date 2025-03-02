@@ -16,7 +16,6 @@ public class ProductModel implements Serializable {
     public ProductModel() {
     }
 
-    // Constructor with Firebase fields
     public ProductModel(String productId, String imageUrl, String name, double price, String rating, String category, String description) {
         this.productId = productId;
         this.imageUrl = imageUrl;
@@ -27,7 +26,6 @@ public class ProductModel implements Serializable {
         this.description = description;
     }
 
-    // Getters and setters
     public String getProductId() {
         return productId;
     }

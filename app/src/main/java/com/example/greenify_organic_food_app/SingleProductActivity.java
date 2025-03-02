@@ -49,7 +49,7 @@ public class SingleProductActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
-    private boolean isProfileUpdated = false; // Boolean flag to track profile update status
+    private boolean isProfileUpdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,11 +153,9 @@ public class SingleProductActivity extends AppCompatActivity {
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
                                         if (task1.getResult().exists()) {
-                                            // Profile is updated, perform the action
                                             isProfileUpdated = true;
                                             action.run();
                                         } else {
-                                            // Profile is not updated, show a toast
                                             CustomToast.showToast(SingleProductActivity.this, "Please update your profile first!", false);
                                         }
                                     } else {
@@ -269,7 +267,6 @@ public class SingleProductActivity extends AppCompatActivity {
                             loadIngredientImages(product.getIngList());
                         } else {
                             Log.d("Single Product:", "Ing list is null");
-//
                         }
 
                         Map<String, Long> nutritionMapLong = (Map<String, Long>) documentSnapshot.get("nutrition");
@@ -328,7 +325,7 @@ public class SingleProductActivity extends AppCompatActivity {
 
                     ingredientsAdapter = new IngredientsAdapter(SingleProductActivity.this, ingredientImageUrls);
                     ingredientRecyclerView.setAdapter(ingredientsAdapter);
-                    ingredientsAdapter.notifyDataSetChanged(); // Notify adapter of data change
+                    ingredientsAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FirestoreDb", "Error fetching ingredients: " + e.getMessage());

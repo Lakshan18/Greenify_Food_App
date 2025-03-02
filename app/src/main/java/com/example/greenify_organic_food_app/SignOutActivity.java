@@ -16,15 +16,13 @@ public class SignOutActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
 
-        // Clear the last login time to force the user to sign in again
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putLong("lastLoginTime", -1);
-        editor.putString("signOutCustomer","signOut");// Reset the last login time
+        editor.putString("signOutCustomer","signOut");
         editor.apply();
 
-        // Navigate back to the SignInActivity
         Intent intent = new Intent(SignOutActivity.this, SignInActivity.class);
         startActivity(intent);
-        finish(); // Close the SignOutActivity to prevent going back
+        finish();
     }
 }

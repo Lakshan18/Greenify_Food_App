@@ -34,6 +34,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#FFFFFF"
                     android:padding="16dp">
 
                     <!-- User Profile Image -->
@@ -70,6 +71,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Lakshan Maduranga"
+                            android:textColor="#000000"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -97,9 +99,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/per_details_text1"
-                android:textSize="20sp"
                 android:fontFamily="@font/roboto"
+                android:text="@string/per_details_text1"
+                android:textColor="#000000"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <EditText
@@ -109,7 +112,8 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
                 android:hint="@string/email_text_inp1"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:textColor="#2C2C2C" />
 
             <EditText
                 android:id="@+id/edit_mobile"
@@ -118,7 +122,8 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
                 android:hint="@string/mobile_text_inp2"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:textColor="#2C2C2C" />
 
             <EditText
                 android:id="@+id/edit_username"
@@ -127,7 +132,8 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
                 android:hint="@string/username_text_inp3"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:textColor="#2C2C2C" />
 
             <Button
                 android:id="@+id/btn_update_personal"
@@ -146,12 +152,14 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/del_details_text1"
+                android:textColor="#000000"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/edit_address1"
                 android:layout_width="match_parent"
+                android:textColor="#2C2C2C"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
@@ -161,6 +169,7 @@
             <EditText
                 android:id="@+id/edit_address2"
                 android:layout_width="match_parent"
+                android:textColor="#2C2C2C"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
@@ -177,6 +186,7 @@
                     android:id="@+id/district_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="#2C2C2C"
                     android:padding="10dp"
                     android:background="@drawable/input_bg"
                     android:focusable="false"

@@ -17,7 +17,7 @@ import java.util.List;
 public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.ViewHolder> {
 
     private Context context;
-    private List<String> ingredientImageUrls; // Change to List<String> for image URLs
+    private List<String> ingredientImageUrls;
 
     public IngredientsAdapter(Context context, List<String> ingredientImageUrls){
         this.context = context;
@@ -35,11 +35,10 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String imageUrl = ingredientImageUrls.get(position);
 
-        // Load image from URL using Glide
         Glide.with(context)
                 .load(imageUrl)
-                .placeholder(R.drawable.ic_greenify) // Add a placeholder image
-                .error(R.drawable.ic_error) // Add an error image
+                .placeholder(R.drawable.ic_greenify)
+                .error(R.drawable.ic_error)
                 .into(holder.ingredientImage);
     }
 

@@ -35,12 +35,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import lk.payhere.androidsdk.PHConfigs;
@@ -70,6 +67,8 @@ public class PlaceOrderActivity extends AppCompatActivity {
     private boolean isCartOrder = false;
 
     private double discount = 0.0;
+    private double subtotal = 0.0;
+    private double totalDiscount = 0.0;
 
     private final ActivityResultLauncher<Intent> payHereLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -85,8 +84,8 @@ public class PlaceOrderActivity extends AppCompatActivity {
                             Log.d(TAG, msg);
                             if ("Payment Success".equals(msg)) {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, true);
-                                savePaymentDetailsToFirestore(currentOrder, response.getData(), discount);
-                                orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), discount);
+                                savePaymentDetailsToFirestore(currentOrder, response.getData(), totalDiscount);
+                                orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), totalDiscount, currentOrder.getOrderId());
                             } else {
                                 CustomToast.showToast(PlaceOrderActivity.this, msg, false);
                             }
@@ -152,27 +151,23 @@ public class PlaceOrderActivity extends AppCompatActivity {
             double productPrice = intent.getDoubleExtra("productPrice", 0.0);
             int productQuantity = intent.getIntExtra("productQuantity", 1);
 
+            subtotal = productPrice * productQuantity;
+            totalDiscount = (productQuantity >= 3) ? subtotal * 0.05 : 0.0;
+
+            double total = subtotal - totalDiscount;
+
             ord_p_name.setText(productName);
-            ord_p_price.setText(String.format("Rs: %.2f", productPrice));
-            ord_p_qty.setText("Quantity:" + productQuantity);
+            ord_p_price.setText(String.format("Rs: %.2f", subtotal));
+            ord_p_qty.setText("Quantity: " + productQuantity);
             Glide.with(this).load(productImageUrl).into(ord_p_img);
+
+            ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", totalDiscount));
+            ord_total_price.setText(String.format("Total: Rs: %.2f", total));
 
             if (productQuantity >= 3) {
                 ord_p_price.setTextColor(getResources().getColor(R.color.red));
             } else {
                 ord_p_price.setTextColor(getResources().getColor(R.color.price_color));
-            }
-
-            if (productQuantity >= 3) {
-                discount = productPrice * 0.05;
-                double discountedTotal = productPrice - discount;
-
-                ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", discount));
-                ord_total_price.setText(String.format("Total: Rs: %.2f", discountedTotal));
-            } else {
-                discount = 0.0;
-                ord_discount.setText("");
-                ord_total_price.setText(String.format("Total: Rs: %.2f", productPrice));
             }
         }
     }
@@ -185,38 +180,33 @@ public class PlaceOrderActivity extends AppCompatActivity {
         orderItemsAdapter = new OrderItemsAdapter(selectedItems);
         orderItemsRecyclerView.setAdapter(orderItemsAdapter);
 
-        double total = calculateTotalAmount();
-        ord_p_price.setText(String.format("Rs: %.2f", total));
+        subtotal = 0.0;
+        totalDiscount = 0.0;
 
-        if (isCartOrder && selectedItems.size() >= 3) {
+        for (CartModel item : selectedItems) {
+            double itemTotal = item.getPrice() * item.getQuantity();
+            subtotal += itemTotal;
+
+            if (item.getQuantity() >= 3) {
+                totalDiscount += itemTotal * 0.05;
+            }
+        }
+
+        double total = subtotal - totalDiscount;
+
+        ord_p_price.setText(String.format("Rs: %.2f", subtotal));
+        ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", totalDiscount));
+        ord_total_price.setText(String.format("Total: Rs: %.2f", total));
+
+        if (totalDiscount > 0) {
             ord_p_price.setTextColor(getResources().getColor(R.color.red));
         } else {
             ord_p_price.setTextColor(getResources().getColor(R.color.price_color));
         }
-
-        if (isCartOrder && selectedItems.size() >= 3) {
-            discount = total * 0.05;
-            double discountedTotal = total - discount;
-
-            ord_discount.setText(String.format("Discount: 5%% Rs: %.2f", discount));
-            ord_total_price.setText(String.format("Total: Rs: %.2f", discountedTotal));
-        } else {
-            discount = 0.0;
-            ord_discount.setText("");
-            ord_total_price.setText(String.format("Total: Rs: %.2f", total));
-        }
     }
 
     private double calculateTotalAmount() {
-        double total = 0;
-        if (isCartOrder) {
-            for (CartModel item : selectedItems) {
-                total += item.getPrice() * item.getQuantity();
-            }
-        } else {
-            total = getIntent().getDoubleExtra("productPrice", 0.0);
-        }
-        return total;
+        return subtotal - totalDiscount;
     }
 
     private void setupClickListeners() {
@@ -421,32 +411,33 @@ public class PlaceOrderActivity extends AppCompatActivity {
 
     private void handleCashOnDelivery(OrderDataModel orderDataModel) {
         currentOrder = orderDataModel;
+        String orderId = "ord_N" + System.currentTimeMillis();
         savePaymentDetailsToFirestore(
                 currentOrder,
+                orderId,
                 "Cash on Delivery",
                 "Pending",
-                "CASH-" + currentOrder.getOrderId(),
-                discount
+                "CASH-" + orderId,
+                totalDiscount
         );
-        orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), discount);
+        orderConfirmed(currentOrder.getAddress(), currentOrder.getEmail(), totalDiscount, orderId);
     }
 
-    private void orderConfirmed(String customer_address, String customer_email, double discount) {
+    private void orderConfirmed(String customer_address, String customer_email, double discount, String orderId) {
         if (currentOrder == null) {
             Log.e(TAG, "Order data is missing!");
             return;
         }
-
-        String orderId = "ord_N" + System.currentTimeMillis();
 
         Map<String, Object> orderData = new HashMap<>();
         orderData.put("order_id", orderId);
         orderData.put("customer_email", customer_email);
         orderData.put("deliverer_status", "Unassigned");
         orderData.put("order_status", "Pending");
+        orderData.put("status_updated_at", Timestamp.now());
         orderData.put("customer_address", customer_address);
         orderData.put("date_time", Timestamp.now());
-        orderData.put("total_price", calculateTotalAmount());
+        orderData.put("total_price", subtotal);
         orderData.put("discount", discount);
 
         if (isCartOrder) {
@@ -472,6 +463,11 @@ public class PlaceOrderActivity extends AppCompatActivity {
                     Log.d(TAG, "Order completed!");
                     Intent trackingIntent = new Intent(PlaceOrderActivity.this, OrderTrackingActivity.class);
                     trackingIntent.putExtra("orderId", orderId);
+                    if (isCartOrder && !selectedItems.isEmpty()) {
+                        trackingIntent.putExtra("productImageUrl", selectedItems.get(0).getImage());
+                    } else {
+                        trackingIntent.putExtra("productImageUrl", getIntent().getStringExtra("productImageUrl"));
+                    }
                     startActivity(trackingIntent);
                     finish();
                 })
@@ -483,7 +479,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         itemData.put("product_id", item.getProductId());
         itemData.put("product_name", item.getProductName());
         itemData.put("quantity", item.getQuantity());
-        itemData.put("unit_price", item.getPrice() / item.getQuantity());
+        itemData.put("unit_price", item.getPrice());
         itemData.put("image_url", item.getImage());
 
         db.collection("order")
@@ -517,14 +513,14 @@ public class PlaceOrderActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e(TAG, "Error saving payment details", e));
     }
 
-    private void savePaymentDetailsToFirestore(OrderDataModel order, String paymentMethod, String paymentStatus, String transactionId, double discount) {
+    private void savePaymentDetailsToFirestore(OrderDataModel order, String orderId, String paymentMethod, String paymentStatus, String transactionId, double discount) {
         if (order == null) {
             Log.e(TAG, "Order data is missing!");
             return;
         }
 
         Map<String, Object> paymentData = new HashMap<>();
-        paymentData.put("order_id", order.getOrderId());
+        paymentData.put("order_id", orderId);
         paymentData.put("customer_name", order.getCustomerName());
         paymentData.put("customer_email", order.getEmail());
         paymentData.put("customer_mobile", order.getMobile());
@@ -536,7 +532,7 @@ public class PlaceOrderActivity extends AppCompatActivity {
         paymentData.put("timestamp", Timestamp.now());
 
         db.collection("payments")
-                .document(order.getOrderId())
+                .document(orderId)
                 .set(paymentData)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Cash on Delivery payment saved"))
                 .addOnFailureListener(e -> Log.e(TAG, "Error saving Cash on Delivery", e));

@@ -80,12 +80,14 @@ public class SignUpActivity extends AppCompatActivity {
             customer.put("password", cusPassword);
             customer.put("username", null);
             customer.put("profile_img", null);
+            customer.put("isFirstTime",false);
 
             db.collection("customer")
                     .add(customer)
                     .addOnSuccessListener(documentReference -> {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean("isFirstTimeUser", false);
+                        editor.putString("customerEmail",cusEmail);
                         editor.apply();
 
                         CustomToast.showToast(SignUpActivity.this, "Registration Successful!", true);

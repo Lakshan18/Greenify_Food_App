@@ -57,7 +57,6 @@ public class OrderInvoiceActivity extends AppCompatActivity {
         orderTotalTextView = findViewById(R.id.order_price_reci);
         downloadReceiptButton = findViewById(R.id.download_btn_reci);
 
-        // Get order details from intent
         String productImageUrl = getIntent().getStringExtra("productImage");
         String getName = getIntent().getStringExtra("productName");
         String orderId = getIntent().getStringExtra("orderId");
@@ -79,22 +78,18 @@ public class OrderInvoiceActivity extends AppCompatActivity {
         orderStatusTextView.setText("Status: " + orderStatus);
         orderTotalTextView.setText(String.format("Total: Rs %.2f", orderTotal));
 
-        // Handle download receipt button click
         downloadReceiptButton.setOnClickListener(v -> downloadReceipt(orderId, getName, orderDate, orderStatus, orderTotal));
     }
 
     private void downloadReceipt(String orderId, String productName, String orderDate, String orderStatus, double orderTotal) {
-        // Create a file to save the PDF in the Downloads folder
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(downloadsDir, "Receipt_" + orderId + ".pdf");
 
         try {
-            // Initialize PDF writer and document
             PdfWriter writer = new PdfWriter(new FileOutputStream(file));
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-            // Add logo from drawable
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.greenify_food_logo);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -102,10 +97,9 @@ public class OrderInvoiceActivity extends AppCompatActivity {
 
             Image logo = new Image(ImageDataFactory.create(bitmapData))
                     .setWidth(100)
-                    .setAutoScale(true); // Automatically scale the height to maintain aspect ratio
+                    .setAutoScale(true);
             document.add(logo);
 
-            // Add header with company details
             Paragraph companyName = new Paragraph("Greenify Organic Food")
                     .setFontSize(20)
                     .setBold()
@@ -125,7 +119,6 @@ public class OrderInvoiceActivity extends AppCompatActivity {
                     .setMarginBottom(20);
             document.add(companyContact);
 
-            // Add order receipt title
             Paragraph receiptTitle = new Paragraph("Order Receipt")
                     .setFontSize(18)
                     .setBold()
@@ -133,11 +126,9 @@ public class OrderInvoiceActivity extends AppCompatActivity {
                     .setMarginBottom(20);
             document.add(receiptTitle);
 
-            // Add order details table
-            float[] columnWidths = {150f, 350f}; // Column widths for the table
+            float[] columnWidths = {150f, 350f};
             Table table = new Table(UnitValue.createPercentArray(columnWidths)).useAllAvailableWidth();
 
-            // Add rows to the table
             table.addCell(createCell("Order ID", true));
             table.addCell(createCell(orderId, false));
 
@@ -155,7 +146,6 @@ public class OrderInvoiceActivity extends AppCompatActivity {
 
             document.add(table);
 
-            // Add thank you message
             Paragraph thankYouMessage = new Paragraph("Thank you for choosing Greenify Organic Food! We appreciate your business and hope to serve you again soon.")
                     .setFontSize(14)
                     .setTextAlignment(TextAlignment.JUSTIFIED)
@@ -163,7 +153,6 @@ public class OrderInvoiceActivity extends AppCompatActivity {
                     .setFontColor(ColorConstants.GREEN);
             document.add(thankYouMessage);
 
-            // Add footer
             Paragraph footer = new Paragraph("Visit us at: www.greenify.com")
                     .setFontSize(12)
                     .setTextAlignment(TextAlignment.CENTER)
@@ -171,10 +160,8 @@ public class OrderInvoiceActivity extends AppCompatActivity {
                     .setFontColor(ColorConstants.DARK_GRAY);
             document.add(footer);
 
-            // Close the document
             document.close();
 
-            // Notify the user
             CustomToast.showToast(OrderInvoiceActivity.this, "Receipt saved to " + file.getAbsolutePath(), true);
         } catch (IOException e) {
             e.printStackTrace();

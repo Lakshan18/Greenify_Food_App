@@ -8,7 +8,7 @@
     android:backgroundTint="#F0F0F0"
     android:orientation="vertical">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -27,13 +27,14 @@
                     android:id="@+id/textView11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="84dp"
                     android:layout_marginTop="16dp"
                     android:fontFamily="@font/roboto"
                     android:text="@string/sgl_headingText1"
+                    android:textColor="#000000"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    app:layout_constraintStart_toEndOf="@+id/backTo_View1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
@@ -66,29 +67,6 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.457" />
 
-                    <TextView
-                        android:id="@+id/textView12"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/for_ratingText1"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.795"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/productImage" />
-
-                    <TextView
-                        android:id="@+id/textView13"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text=" 4.5/5"
-                        android:textColor="@color/rating_color"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toEndOf="@+id/textView12"
-                        app:layout_constraintTop_toBottomOf="@+id/productImage" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ImageView
@@ -98,8 +76,6 @@
                     android:layout_marginEnd="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
-                    app:layout_constraintStart_toEndOf="@+id/textView11"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.057"
                     app:srcCompat="@drawable/recipe_ic" />
@@ -154,6 +130,7 @@
                     android:layout_marginEnd="16dp"
                     android:text="1"
                     android:textAlignment="center"
+                    android:textColor="#1F1F1F"
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/sgl_increase_btn"
@@ -179,6 +156,7 @@
                 android:fontFamily="@font/roboto"
                 android:paddingHorizontal="15sp"
                 android:text="Product Description"
+                android:textColor="#373737"
                 android:textSize="18sp" />
 
             <TextView
@@ -189,6 +167,7 @@
                 android:fontFamily="@font/roboto"
                 android:paddingHorizontal="15sp"
                 android:text="@string/sgl_subText1"
+                android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -204,21 +183,25 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/sgl_subText2"
-                android:fontFamily="@font/roboto"
-                android:textSize="18sp"
-                android:textStyle="bold"
                 android:layout_marginTop="12sp"
-                android:paddingHorizontal="15sp"/>
+                android:fontFamily="@font/roboto"
+                android:paddingHorizontal="15sp"
+                android:text="@string/sgl_subText2"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/nutritionRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
                 android:scrollbars="none"/>
+
 
             <Button
                 android:id="@+id/add_to_cart_btn"
@@ -247,6 +230,6 @@
                 android:textColor="@color/white"/>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>>
 
 </LinearLayout>

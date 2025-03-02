@@ -53,32 +53,32 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         Glide.with(context).load(cartItem.getImage()).into(holder.itemImage);
 
-        // Handle checkbox state
         holder.checkBoxSelect.setChecked(cartItem.isSelected());
         holder.checkBoxSelect.setOnCheckedChangeListener((buttonView, isChecked) -> {
             cartItem.setSelected(isChecked);
             cartUpdateListener.onCartUpdated();
         });
 
-        // Increase quantity
         holder.btnIncrease.setOnClickListener(v -> {
-            int currentQuantity = cartItem.getQuantity();
-            cartItem.setQuantity(currentQuantity + 1);
-            notifyItemChanged(position);
-            cartUpdateListener.onCartUpdated();
-        });
-
-        // Decrease quantity
-        holder.btnDecrease.setOnClickListener(v -> {
-            int currentQuantity = cartItem.getQuantity();
-            if (currentQuantity > 1) {
-                cartItem.setQuantity(currentQuantity - 1);
+            if (cartItem.isSelected()) {
+                int currentQuantity = cartItem.getQuantity();
+                cartItem.setQuantity(currentQuantity + 1);
                 notifyItemChanged(position);
                 cartUpdateListener.onCartUpdated();
             }
         });
 
-        // Remove item
+        holder.btnDecrease.setOnClickListener(v -> {
+            if (cartItem.isSelected()) {
+                int currentQuantity = cartItem.getQuantity();
+                if (currentQuantity > 1) {
+                    cartItem.setQuantity(currentQuantity - 1);
+                    notifyItemChanged(position);
+                    cartUpdateListener.onCartUpdated();
+                }
+            }
+        });
+
         holder.btnRemove.setOnClickListener(v -> removeCartItemFromFirestore(cartItem, position));
     }
 

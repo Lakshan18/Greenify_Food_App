@@ -9,8 +9,7 @@ public class OrderDataModel {
     private String productName;
     private String orderId;
 
-    // Constructor
-    public OrderDataModel(String customerName, String mobile, String email, String address, double totalPrice,String productName, String orderId) {
+    public OrderDataModel(String customerName, String mobile, String email, String address, double totalPrice, String productName, String orderId) {
         this.customerName = customerName;
         this.mobile = mobile;
         this.email = email;
@@ -20,32 +19,11 @@ public class OrderDataModel {
         this.orderId = orderId;
     }
 
-    // Getters
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public String getProductName(){
-        return productName;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
+    public String getCustomerName() { return customerName; }
+    public String getMobile() { return mobile; }
+    public String getEmail() { return email; }
+    public String getAddress() { return address; }
+    public double getTotalPrice() { return totalPrice; }
+    public String getProductName() { return productName; }
+    public String getOrderId() { return orderId; }
 }

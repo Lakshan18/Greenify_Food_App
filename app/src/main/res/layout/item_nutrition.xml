@@ -2,21 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="6dp"
-    android:gravity="center_vertical">
+    android:paddingVertical="6dp">
 
     <!-- Nutrition Name -->
     <TextView
         android:id="@+id/nutrientName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"
         android:text="Protein"
         android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:layout_marginEnd="8dp"
-        android:gravity="center_vertical" />
+        android:textSize="16sp" />
 
     <!-- Percentage Bar Container -->
     <LinearLayout
@@ -30,7 +30,7 @@
             android:id="@+id/progressBar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="@android:color/holo_green_light"/>
+            android:background="@android:color/holo_green_light" />
     </LinearLayout>
 
     <!-- Nutrition Percentage -->
@@ -38,9 +38,9 @@
         android:id="@+id/nutrientPercentage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:gravity="center_vertical"
         android:text="25%"
         android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:layout_marginStart="8dp"
-        android:gravity="center_vertical"/>
+        android:textSize="16sp" />
 </LinearLayout>

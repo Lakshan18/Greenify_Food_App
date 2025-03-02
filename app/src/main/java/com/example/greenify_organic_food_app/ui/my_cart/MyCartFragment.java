@@ -24,7 +24,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MyCartFragment extends Fragment {
 
@@ -38,19 +40,16 @@ public class MyCartFragment extends Fragment {
     private static final int MAX_QUANTITY = 5;
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
+    private Set<String> selectedProductIds = new HashSet<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_cart, container, false);
 
-        // Initialize SharedPreferences
         sharedPreferences = requireActivity().getSharedPreferences("CustomerSession", Context.MODE_PRIVATE);
-
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
-        // Initialize views
         cartRecyclerView = view.findViewById(R.id.cartRecyclerView);
         txtSubtotal = view.findViewById(R.id.subTotal);
         txtDiscount = view.findViewById(R.id.discount);
@@ -59,16 +58,13 @@ public class MyCartFragment extends Fragment {
         emptyCartMessage = view.findViewById(R.id.emptyCartMessage);
         cartSummaryLayout = view.findViewById(R.id.cartSummaryLayout);
 
-        // Initialize cart items list and adapter
         cartItems = new ArrayList<>();
         cartAdapter = new CartAdapter(getContext(), cartItems, this::updateCartSummary);
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         cartRecyclerView.setAdapter(cartAdapter);
 
-        // Fetch cart items from Firestore
         fetchCartItems();
 
-        // Set checkout button click listener
         btnCheckout.setOnClickListener(v -> {
             List<CartModel> selectedItems = getSelectedItems();
             if (selectedItems.isEmpty()) {
@@ -81,7 +77,6 @@ public class MyCartFragment extends Fragment {
         return view;
     }
 
-    // Fetch cart items from Firestore
     private void fetchCartItems() {
         String customerEmail = sharedPreferences.getString("customerEmail", null);
 
@@ -104,6 +99,13 @@ public class MyCartFragment extends Fragment {
                                 .get()
                                 .addOnCompleteListener(cartTask -> {
                                     if (cartTask.isSuccessful()) {
+                                        selectedProductIds.clear();
+                                        for (CartModel item : cartItems) {
+                                            if (item.isSelected()) {
+                                                selectedProductIds.add(item.getProductId());
+                                            }
+                                        }
+
                                         cartItems.clear();
                                         for (DocumentSnapshot cartDocument : cartTask.getResult()) {
                                             String productName = cartDocument.getString("productName");
@@ -118,18 +120,18 @@ public class MyCartFragment extends Fragment {
 
                                             int quantity = quantityLong.intValue();
 
-                                            // Create CartModel object and add to list
                                             CartModel cartItem = new CartModel(
                                                     productName,
                                                     quantity,
                                                     price,
                                                     image,
-                                                    cartDocument.getId() // Store product ID as document ID
+                                                    cartDocument.getId()
                                             );
+
+                                            cartItem.setSelected(selectedProductIds.contains(cartDocument.getId()));
                                             cartItems.add(cartItem);
                                         }
 
-                                        // Notify adapter and update cart summary
                                         cartAdapter.notifyDataSetChanged();
                                         updateCartSummary();
                                     } else {
@@ -144,38 +146,40 @@ public class MyCartFragment extends Fragment {
                 });
     }
 
-    // Update cart summary based on selected items
     private void updateCartSummary() {
         double subtotal = 0;
-        int selectedCount = 0;
+        double totalDiscount = 0;
+        selectedProductIds.clear();
 
         for (CartModel item : cartItems) {
             if (item.isSelected()) {
-                // Apply quantity validation only to selected items
+                selectedProductIds.add(item.getProductId());
+
                 if (item.getQuantity() > MAX_QUANTITY) {
                     item.setQuantity(MAX_QUANTITY);
                     Toast.makeText(getContext(), "Maximum quantity reached (5 items per product).", Toast.LENGTH_SHORT).show();
                 }
-                subtotal += item.getPrice() * item.getQuantity();
-                selectedCount++;
+
+                double itemTotal = item.getPrice() * item.getQuantity();
+                subtotal += itemTotal;
+
+                if (item.getQuantity() >= 3) {
+                    double itemDiscount = itemTotal * 0.05;
+                    totalDiscount += itemDiscount;
+                }
             }
         }
 
-        // Calculate discount and total
-        double discount = subtotal * 0.05; // 5% discount
-        double total = subtotal - discount;
+        double total = subtotal - totalDiscount;
 
-        // Update UI
         txtSubtotal.setText(String.format("Rs: %.2f", subtotal));
-        txtDiscount.setText(String.format("Rs: %.2f", discount));
+        txtDiscount.setText(String.format("Rs: %.2f", totalDiscount));
         txtTotal.setText(String.format("Rs: %.2f", total));
 
-        // Update checkout button text
-        btnCheckout.setText(selectedCount > 0 ?
-                "Checkout (" + selectedCount + " items)" :
-                "Checkout");
+        btnCheckout.setText(selectedProductIds.isEmpty() ?
+                "Checkout" :
+                "Checkout (" + selectedProductIds.size() + " items)");
 
-        // Show/hide empty cart message
         if (cartItems.isEmpty()) {
             emptyCartMessage.setVisibility(View.VISIBLE);
             cartSummaryLayout.setVisibility(View.GONE);
@@ -185,7 +189,6 @@ public class MyCartFragment extends Fragment {
         }
     }
 
-    // Get selected items for checkout
     private List<CartModel> getSelectedItems() {
         List<CartModel> selectedItems = new ArrayList<>();
         for (CartModel item : cartItems) {
@@ -196,7 +199,6 @@ public class MyCartFragment extends Fragment {
         return selectedItems;
     }
 
-    // Proceed to checkout with selected items
     private void proceedToCheckout(List<CartModel> selectedItems) {
         Intent intent = new Intent(getContext(), PlaceOrderActivity.class);
         intent.putParcelableArrayListExtra("selectedItems", new ArrayList<>(selectedItems));

@@ -63,7 +63,6 @@ public class MyProfileFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
-    // LocationIQ API Key
     private static final String LOCATIONIQ_API_KEY = "pk.7cffa57d7e32ea76bf5813a99f839548";
 
     @Override
@@ -123,7 +122,6 @@ public class MyProfileFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Handle image picker result
         if (requestCode == PICK_IMAGE_REQUEST) {
             if (resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
                 imageUri = data.getData();
@@ -137,7 +135,6 @@ public class MyProfileFragment extends Fragment {
                 }
             }
         }
-        // Handle Places Autocomplete result
         else if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == getActivity().RESULT_OK && data != null) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
@@ -157,9 +154,7 @@ public class MyProfileFragment extends Fragment {
                     Log.e("Places", "Error: " + status.getStatusMessage());
                 }
             }
-            // Handle user cancellation
             else if (resultCode == getActivity().RESULT_CANCELED) {
-                // Optional: Show cancellation message
                 Toast.makeText(getContext(), "Address selection cancelled", Toast.LENGTH_SHORT).show();
             }
         }
@@ -317,13 +312,10 @@ public class MyProfileFragment extends Fragment {
             return;
         }
 
-        // Combine address components into a single query
         String fullAddress = addressLine1 + ", " + addressLine2 + ", " + district;
 
-        // Fetch latitude and longitude using LocationIQ
         fetchLatLongFromAddress(fullAddress, (latitude, longitude) -> {
             if (latitude != null && longitude != null) {
-                // Save address and coordinates to Firestore
                 saveAddressToFirestore(addressLine1, addressLine2, district, contactNumber, latitude, longitude);
             } else {
                 CustomToast.showToast(getContext(), "Failed to fetch location. Please check the address.", false);

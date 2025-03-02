@@ -18,12 +18,10 @@ public class ProductRecipeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_recipe);
 
-        // Initialize PlayerView
         playerView = findViewById(R.id.playerView);
         player = new ExoPlayer.Builder(this).build();
         playerView.setPlayer(player);
 
-        // Load video from URL
         String videoUrl = "https://images.all-free-download.com/footage_preview/mp4/closeup_of_meal_ingredients_preparation_6892114.mp4";
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
         player.setMediaItem(mediaItem);

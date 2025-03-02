@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.example.greenify_organic_food_app.CustomToast;
 import com.example.greenify_organic_food_app.R;
+import com.example.greenify_organic_food_app.model.CartModel;
 import com.example.greenify_organic_food_app.model.OrderHisModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,7 +55,7 @@ public class OrderHistoryFragment extends Fragment {
         orderRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         orderList = new ArrayList<>();
-        ordHisAdapter = new OrderHisAdapter(orderList,getContext());
+        ordHisAdapter = new OrderHisAdapter(orderList, getContext());
         orderRecyclerView.setAdapter(ordHisAdapter);
 
         loadOrders(customerEmail);
@@ -76,12 +77,14 @@ public class OrderHistoryFragment extends Fragment {
                             String dateTime = formatTimestamp(timestamp);
                             String orderId = orderDocument.getId();
                             double totalPrice = orderDocument.getDouble("total_price");
+                            double totalDiscount = orderDocument.getDouble("discount");
                             String orderStatus = orderDocument.getString("order_status");
 
                             orderDocument.getReference().collection("items")
                                     .get()
                                     .addOnCompleteListener(itemsTask -> {
                                         if (itemsTask.isSuccessful()) {
+                                            List<CartModel> products = new ArrayList<>();
                                             for (DocumentSnapshot itemDocument : itemsTask.getResult()) {
                                                 String productName = itemDocument.getString("product_name");
                                                 Long quantityLong = itemDocument.getLong("quantity");
@@ -89,16 +92,33 @@ public class OrderHistoryFragment extends Fragment {
                                                 String imageUrl = itemDocument.getString("image_url");
                                                 double unitPrice = itemDocument.getDouble("unit_price");
 
-                                                OrderHisModel orderItem = new OrderHisModel(
-                                                        orderId,
+                                                // Calculate discount for each product
+                                                double itemTotal = unitPrice * quantity;
+                                                double itemDiscount = 0.0;
+                                                if (quantity >= 3) {
+                                                    itemDiscount = itemTotal * 0.05;
+                                                }
+
+                                                CartModel product = new CartModel(
                                                         productName,
                                                         quantity,
-                                                        unitPrice * quantity,
-                                                        orderStatus,
-                                                        dateTime,
-                                                        imageUrl);
-                                                tempOrderList.add(orderItem);
+                                                        unitPrice,
+                                                        imageUrl,
+                                                        itemDocument.getId()
+                                                );
+                                                product.setSelected(true); // Mark as selected for display
+                                                products.add(product);
                                             }
+
+                                            OrderHisModel orderItem = new OrderHisModel(
+                                                    orderId,
+                                                    orderStatus,
+                                                    dateTime,
+                                                    products,
+                                                    totalPrice,
+                                                    totalDiscount
+                                            );
+                                            tempOrderList.add(orderItem);
 
                                             tempOrderList.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 

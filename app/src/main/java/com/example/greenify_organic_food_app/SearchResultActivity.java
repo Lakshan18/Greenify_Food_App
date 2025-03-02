@@ -36,7 +36,6 @@ public class SearchResultActivity extends AppCompatActivity {
         searchResultsAdapter = new ProductAdapter(searchResults, this);
         searchResultsRecyclerView.setAdapter(searchResultsAdapter);
 
-        // Get the search query from the intent
         String query = getIntent().getStringExtra("searchQuery");
         if (query != null && !query.isEmpty()) {
             performSearch(query);
@@ -44,10 +43,8 @@ public class SearchResultActivity extends AppCompatActivity {
     }
 
     private void performSearch(String query) {
-        // Use a Set to avoid duplicate results
         Set<ProductModel> uniqueResults = new HashSet<>();
 
-        // Query for name
         db.collection("product")
                 .whereGreaterThanOrEqualTo("name", query)
                 .whereLessThanOrEqualTo("name", query + "\uf8ff")
@@ -58,7 +55,6 @@ public class SearchResultActivity extends AppCompatActivity {
                             ProductModel product = createProductModelFromDocument(document);
                             uniqueResults.add(product);
                         }
-                        // After name query, query for category
                         queryCategory(query, uniqueResults);
                     }
                 });
@@ -75,7 +71,6 @@ public class SearchResultActivity extends AppCompatActivity {
                             ProductModel product = createProductModelFromDocument(document);
                             uniqueResults.add(product);
                         }
-                        // After category query, query for description
                         queryDescription(query, uniqueResults);
                     }
                 });
@@ -92,7 +87,6 @@ public class SearchResultActivity extends AppCompatActivity {
                             ProductModel product = createProductModelFromDocument(document);
                             uniqueResults.add(product);
                         }
-                        // After all queries, update the RecyclerView
                         updateRecyclerView(uniqueResults);
                     }
                 });

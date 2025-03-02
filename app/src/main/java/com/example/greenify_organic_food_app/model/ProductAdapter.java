@@ -43,11 +43,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         Glide.with(context).load(product.getImageUrl()).into(holder.productImage);
         holder.productTitle.setText(product.getName());
-        holder.productPrice.setText(formattedPrice); // Set formatted price
-        holder.productRatingText.setText(product.getRating() + "/5");
+        holder.productPrice.setText(formattedPrice);
+//        holder.productRatingText.setText(product.getRating() + "/5");
 
         holder.itemView.setOnClickListener(v -> {
-            // Pass the ProductModel to SingleProductActivity
             Intent intent = new Intent(v.getContext(), SingleProductActivity.class);
             intent.putExtra("p_id", product.getProductId());
             intent.putExtra("product", product);
@@ -60,11 +59,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    // Add this method to update the product list dynamically
     public void updateProductList(List<ProductModel> newProductList) {
         productList.clear();
         productList.addAll(newProductList);
-        notifyDataSetChanged(); // Notify adapter of data changes
+        notifyDataSetChanged();
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
@@ -76,7 +74,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             productImage = itemView.findViewById(R.id.productImage);
             productTitle = itemView.findViewById(R.id.productTitle);
             productPrice = itemView.findViewById(R.id.productPrice);
-            productRatingText = itemView.findViewById(R.id.productRatingText);
+//            productRatingText = itemView.findViewById(R.id.productRatingText);
         }
     }
 }

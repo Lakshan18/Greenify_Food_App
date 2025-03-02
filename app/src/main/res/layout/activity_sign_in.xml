@@ -129,6 +129,7 @@
         android:backgroundTint="#242A24"
         android:fontFamily="@font/quicksand_regular"
         android:text="@string/signIn_btn_text1"
+        android:textColor="#FFFFFF"
         android:textSize="20sp"
         app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"

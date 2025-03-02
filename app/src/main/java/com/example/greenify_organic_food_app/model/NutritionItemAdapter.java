@@ -36,11 +36,9 @@ public class NutritionItemAdapter extends RecyclerView.Adapter<NutritionItemAdap
         holder.nutrientName.setText(item.getName());
         holder.nutrientPercentage.setText(item.getPercentage() + "%");
 
-        // Convert percentage to width dynamically
-        int maxWidth = 600; // Max width in pixels
+        int maxWidth = 600;
         int progressWidth = (maxWidth * item.getPercentage()) / 100;
 
-        // Apply width to progress bar
         ViewGroup.LayoutParams params = holder.progressBar.getLayoutParams();
         params.width = progressWidth;
         holder.progressBar.setLayoutParams(params);

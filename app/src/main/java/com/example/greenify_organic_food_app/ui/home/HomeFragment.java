@@ -87,10 +87,7 @@ public class HomeFragment extends Fragment {
             if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
                 String query = homeSearchField.getText().toString().trim();
                 if (!query.isEmpty()) {
-                    // Start SearchResultsActivity with the search query
-                    Intent intent = new Intent(getActivity(), SearchResultActivity.class);
-                    intent.putExtra("searchQuery", query);
-                    startActivity(intent);
+                    navigateToSearchFragment(query);
                 }
                 return true;
             }

@@ -11,9 +11,8 @@ public class CartModel implements Parcelable {
     private final double price;
     private final String image;
     private boolean selected;
-    private String productId; // New field
+    private String productId;
 
-    // Default constructor
     public CartModel() {
         this.productName = "";
         this.quantity = 0;
@@ -23,7 +22,6 @@ public class CartModel implements Parcelable {
         this.productId = "";
     }
 
-    // Parameterized constructor
     public CartModel(String productName, int quantity, double price, String image, String productId) {
         this.productName = productName;
         this.quantity = quantity;
@@ -54,7 +52,6 @@ public class CartModel implements Parcelable {
         }
     };
 
-    // Getters and setters
     public String getProductId() { return productId; }
     public void setProductId(String productId) { this.productId = productId; }
     public String getProductName() { return productName; }
@@ -78,7 +75,6 @@ public class CartModel implements Parcelable {
         dest.writeString(productId);
     }
 
-    // Rest of existing equals/hashCode/toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
