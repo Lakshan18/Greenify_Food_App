@@ -179,6 +179,8 @@ public class HomeFragment extends Fragment {
                 return R.drawable.sides;
             case "Drinks":
                 return R.drawable.food_drinks;
+            case "Desserts":
+                return R.drawable.org_desserts;
             default:
                 return R.drawable.default_category;
         }

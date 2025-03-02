@@ -99,7 +99,7 @@ public class SignInActivity extends AppCompatActivity {
                                     editor.putString("customerName", dbName);
                                     editor.putString("customerId",dbCusId);
                                     editor.putString("customerMobile", dbMobile);
-                                    editor.putString("customerEmail", lowercaseEmail); // Use lowercase email
+                                    editor.putString("customerEmail", lowercaseEmail);
                                     editor.putLong("lastLoginTime", System.currentTimeMillis());
                                     editor.apply();
 
